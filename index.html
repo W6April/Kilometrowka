@@ -1,1 +1,1554 @@
 
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>AutoKilometrówka Pro v8.0 - Dziennik i Uzupełnianie</title>
+  
+  <meta name="theme-color" content="#0f172a">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Kilometrówka">
+  
+  <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22AutoKilometr%C3%B3wka%20Pro%22%2C%22short_name%22%3A%22Kilometr%C3%B3wka%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230f172a%22%2C%22theme_color%22%3A%22%232563eb%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20512%20512%27%3E%3Crect%20width%3D%27512%27%20height%3D%27512%27%20rx%3D%27110%27%20fill%3D%27%232563eb%27%2F%3E%3Cpath%20d%3D%27M110%20350h292M150%20210l45-75h122l45%2075M130%20210h252c20%200%2030%2015%2030%2035v70H100v-70c0-20%2010-35%2030-35z%27%20stroke%3D%27white%27%20stroke-width%3D%2726%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%20fill%3D%27none%27%2F%3E%3Ccircle%20cx%3D%27165%27%20cy%3D%27315%27%20r%3D%2726%27%20fill%3D%27white%27%2F%3E%3Ccircle%20cx%3D%27347%27%20cy%3D%27315%27%20r%3D%2726%27%20fill%3D%27white%27%2F%3E%3C%2Fsvg%3E%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      background-color: #0f172a;
+      color: #f1f5f9;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    select, input[type="date"], input[type="number"], input[type="text"] {
+      background-color: #0f172a;
+      color: #ffffff;
+      border: 1px solid #475569;
+      border-radius: 0.5rem;
+      padding: 0.45rem 0.65rem;
+      font-size: 0.85rem;
+    }
+    select:focus, input:focus {
+      outline: 2px solid #3b82f6;
+      border-color: #3b82f6;
+    }
+    select option {
+      background-color: #1e293b;
+      color: #ffffff;
+    }
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      filter: invert(0.85);
+      cursor: pointer;
+    }
+    .veh-card {
+      border: 2px solid #334155;
+      background-color: #0f172a;
+      transition: all 0.15s ease-in-out;
+    }
+    .veh-card.selected {
+      border-color: #3b82f6;
+      background-color: rgba(30, 58, 138, 0.22);
+    }
+    @media print {
+      body { background: #ffffff !important; color: #000000 !important; font-size: 9pt; }
+      .no-print { display: none !important; }
+      .print-only { display: block !important; }
+      .print-page-break { page-break-after: always; break-after: page; }
+      .print-page-break:last-child { page-break-after: auto; break-after: auto; }
+      table { width: 100% !important; border-collapse: collapse !important; margin-top: 8px; }
+      th, td { border: 1px solid #000000 !important; padding: 4px 6px !important; color: #000000 !important; }
+      th { background-color: #e2e8f0 !important; font-weight: bold; }
+      @page { size: A4 landscape; margin: 1cm; }
+    }
+    .print-only { display: none; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- NAGŁÓWEK -->
+  <header class="bg-slate-800 border-b border-slate-700 sticky top-0 z-30 no-print shadow-md">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-2">
+      <div class="flex items-center space-x-3">
+        <div class="bg-blue-600 text-white w-10 h-10 rounded-xl flex items-center justify-center font-bold text-lg shadow-lg">
+          KM
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-base sm:text-lg font-bold tracking-tight text-white">AutoKilometrówka Pro</h1>
+            <span class="text-[11px] bg-blue-500/20 text-blue-300 border border-blue-500/30 px-2 py-0.5 rounded-full font-mono">v8.0 Dziennik</span>
+          </div>
+          <p class="text-xs text-slate-400">Rzeczywisty rejestr tras + inteligentne uzupełnianie braków</p>
+        </div>
+      </div>
+      
+      <div class="flex items-center gap-1.5">
+        <button type="button" onclick="resetAllToDefaults()" class="bg-slate-700 hover:bg-slate-600 text-xs text-amber-300 px-2.5 py-2 rounded-lg border border-slate-600 transition">
+          Reset
+        </button>
+        <button type="button" onclick="exportJSON()" class="bg-slate-700 hover:bg-slate-600 text-xs text-slate-200 px-2.5 py-2 rounded-lg border border-slate-600 transition">
+          Zapisz bazę
+        </button>
+        <label class="bg-slate-700 hover:bg-slate-600 text-xs text-slate-200 px-2.5 py-2 rounded-lg border border-slate-600 cursor-pointer transition">
+          Wgraj
+          <input type="file" id="importFileInput" class="hidden" accept=".json" onchange="importJSON(event)">
+        </label>
+      </div>
+    </div>
+  </header>
+
+  <!-- PASEK ZAKŁADEK (Dziennik jako nr 1) -->
+  <div class="max-w-7xl mx-auto px-4 pt-3 w-full no-print">
+    <nav class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-1.5 bg-slate-800/90 p-1.5 rounded-xl border border-slate-700">
+      <button type="button" onclick="switchTab('tab-journal')" id="btn-tab-journal" class="tab-btn py-2 px-2.5 rounded-lg text-xs font-semibold transition bg-blue-600 text-white shadow">
+        1. Dziennik Rzeczywisty
+      </button>
+      <button type="button" onclick="switchTab('tab-generate')" id="btn-tab-generate" class="tab-btn py-2 px-2.5 rounded-lg text-xs font-semibold transition text-slate-300 hover:text-white">
+        2. Generator / Liczniki
+      </button>
+      <button type="button" onclick="switchTab('tab-quotas')" id="btn-tab-quotas" class="tab-btn py-2 px-2.5 rounded-lg text-xs font-semibold transition text-amber-300 hover:text-white border border-amber-500/30">
+        3. Pula Tras
+      </button>
+      <button type="button" onclick="switchTab('tab-vehicles')" id="btn-tab-vehicles" class="tab-btn py-2 px-2.5 rounded-lg text-xs font-semibold transition text-slate-300 hover:text-white">
+        4. Pojazdy (<span id="badge-vehicles">2</span>)
+      </button>
+      <button type="button" onclick="switchTab('tab-drivers')" id="btn-tab-drivers" class="tab-btn py-2 px-2.5 rounded-lg text-xs font-semibold transition text-slate-300 hover:text-white">
+        5. Kierowcy (<span id="badge-drivers">4</span>)
+      </button>
+      <button type="button" onclick="switchTab('tab-calendar')" id="btn-tab-calendar" class="tab-btn py-2 px-2.5 rounded-lg text-xs font-semibold transition text-slate-300 hover:text-white">
+        6. Kalendarz
+      </button>
+      <button type="button" onclick="switchTab('tab-routes')" id="btn-tab-routes" class="tab-btn py-2 px-2.5 rounded-lg text-xs font-semibold transition text-slate-300 hover:text-white">
+        7. Baza Tras
+      </button>
+    </nav>
+  </div>
+
+  <!-- GŁÓWNA ZAWARTOŚĆ -->
+  <main class="max-w-7xl mx-auto px-4 py-4 w-full flex-1">
+    
+    <!-- ==================== ZAKŁADKA 1: DZIENNIK RZECZYWISTY (GŁÓWNA) ==================== -->
+    <div id="tab-journal" class="tab-content space-y-5">
+      <div class="bg-slate-800 rounded-2xl border border-slate-700 p-4 sm:p-5 shadow-xl">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+          <div>
+            <h2 class="text-sm font-bold text-blue-400 uppercase tracking-wider">
+              Dziennik Rzeczywistych Wyjazdów (Co pamiętasz)
+            </h2>
+            <p class="text-xs text-slate-300 mt-0.5">
+              Wpisz tutaj trasy, które faktycznie odbyłeś w miesiącu. Aplikacja uwzględni je jako bazę i uzupełni pozostałe braki.
+            </p>
+          </div>
+          <button type="button" onclick="switchTab('tab-generate')" class="text-xs bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold px-4 py-2 rounded-xl shadow transition">
+            Przejdź do Generatora i Liczników &rarr;
+          </button>
+        </div>
+
+        <!-- Formularz dodawania rzeczywistego wpisu -->
+        <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-700/80 mb-5">
+          <div class="text-xs font-semibold text-slate-300 uppercase mb-3">Dodaj realny wyjazd do rejestru:</div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+            <div>
+              <label class="block text-[11px] text-slate-400 mb-1">Data</label>
+              <input type="date" id="manualDate" class="w-full text-xs">
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-400 mb-1">Samochód</label>
+              <select id="manualVehicle" class="w-full text-xs">
+                <!-- Generowane JS -->
+              </select>
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-400 mb-1">Kierowca</label>
+              <select id="manualDriver" class="w-full text-xs">
+                <!-- Generowane JS -->
+              </select>
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-400 mb-1">Cel / Trasa (Lokalizacja)</label>
+              <input type="text" id="manualRoute" placeholder="Np. Rckik Łódź lub dostawa..." class="w-full text-xs">
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-400 mb-1">Dystans (km)</label>
+              <div class="flex gap-2">
+                <input type="number" id="manualKm" placeholder="np. 160" class="w-full font-mono text-xs">
+                <button type="button" onclick="addManualEntry()" class="bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs px-3 py-1.5 rounded-lg whitespace-nowrap transition">
+                  + Dodaj
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabela rzeczywistych wpisów -->
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr class="bg-slate-900 text-slate-300 border-b border-slate-700 uppercase text-[11px]">
+                <th class="py-2.5 px-3">Data</th>
+                <th class="py-2.5 px-3">Pojazd</th>
+                <th class="py-2.5 px-3">Kierowca</th>
+                <th class="py-2.5 px-3">Cel / Trasa</th>
+                <th class="py-2.5 px-3 text-right">Dystans (km)</th>
+                <th class="py-2.5 px-3 text-right">Usuń</th>
+              </tr>
+            </thead>
+            <tbody id="manualTableBody" class="divide-y divide-slate-700/60 text-slate-200">
+              <!-- Renderowane JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== ZAKŁADKA 2: GENERATOR / LICZNIKI ==================== -->
+    <div id="tab-generate" class="tab-content hidden space-y-5">
+      <div class="bg-slate-800 rounded-2xl border border-slate-700 p-4 sm:p-5 shadow-xl no-print">
+        
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+          <div>
+            <h2 class="text-xs font-bold text-blue-400 uppercase tracking-wider">
+              Krok 2: Okresy, liczniki początkowe i końcowe dla aut
+            </h2>
+            <p class="text-xs text-slate-400">
+              Aplikacja uwzględni Twoje wpisy z Dziennika i dopełni pozostałe kilometry do pełnego stanu licznika.
+            </p>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <button type="button" onclick="selectAllVehicles(true)" class="text-xs bg-slate-700 hover:bg-slate-600 text-slate-200 px-2.5 py-1.5 rounded-lg">
+              Zaznacz wszystkie
+            </button>
+            <button type="button" onclick="switchTab('tab-quotas')" class="text-xs bg-amber-500/25 hover:bg-amber-500/35 text-amber-300 border border-amber-500/40 px-2.5 py-1.5 rounded-lg font-semibold">
+              Limity lokalizacji &rarr;
+            </button>
+          </div>
+        </div>
+
+        <!-- Pasek szybkiego ustawienia dat -->
+        <div class="bg-slate-900/90 p-3 rounded-xl border border-slate-700/80 mb-4 flex flex-wrap items-end justify-between gap-3">
+          <div class="flex flex-wrap items-center gap-3">
+            <span class="text-xs font-semibold text-slate-300">Szybkie ustawienie dat dla wszystkich aut:</span>
+            <div class="flex items-center gap-1.5">
+              <span class="text-[11px] text-slate-400">Od:</span>
+              <input type="date" id="globalDateFrom" class="py-1 px-2 text-xs">
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="text-[11px] text-slate-400">Do:</span>
+              <input type="date" id="globalDateTo" class="py-1 px-2 text-xs">
+            </div>
+            <button type="button" onclick="applyGlobalDatesToAllVehicles()" class="bg-blue-600/30 hover:bg-blue-600/50 text-blue-200 border border-blue-500/40 text-xs font-semibold px-3 py-1.5 rounded-lg transition">
+              Zastosuj do wszystkich
+            </button>
+          </div>
+        </div>
+
+        <div id="multiVehiclesContainer" class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-5"></div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
+          <label class="flex items-start gap-3 p-3 rounded-xl bg-slate-900/60 border border-slate-700/80 cursor-pointer hover:bg-slate-900">
+            <input type="checkbox" id="optRoundTrip" checked onchange="renderQuotasTable()" class="mt-1 w-4 h-4 rounded text-blue-600">
+            <div>
+              <div class="text-xs font-bold text-slate-200">Licz trasy bazowe tam i z powrotem (×2)</div>
+              <div class="text-[11px] text-slate-400">Dotyczy dobieranych automatycznie braków</div>
+            </div>
+          </label>
+          <label class="flex items-start gap-3 p-3 rounded-xl bg-slate-900/60 border border-slate-700/80 cursor-pointer hover:bg-slate-900">
+            <input type="checkbox" id="optRandomSpread" checked class="mt-1 w-4 h-4 rounded text-blue-600">
+            <div>
+              <div class="text-xs font-bold text-slate-200">Losowy narzut do 10% na braki</div>
+              <div class="text-[11px] text-slate-400">Uzupełniane trasy zyskają realistyczny rozrzut</div>
+            </div>
+          </label>
+        </div>
+
+        <button type="button" onclick="generateMultiSchedule()" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg text-sm tracking-wide transition">
+          WYGENERUJ / UZUPEŁNIJ MIESIĄC NA BAZIE DZIENNIKA
+        </button>
+      </div>
+
+      <!-- WYNIKI -->
+      <div id="resultsCard" class="hidden bg-slate-800 rounded-2xl border border-slate-700 p-4 sm:p-5 shadow-xl no-print">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between pb-4 border-b border-slate-700 gap-3">
+          <div>
+            <h2 class="text-base font-bold text-white" id="resultsTitle">Wygenerowana Ewidencja</h2>
+            <p id="resultsSummary" class="text-xs text-emerald-400 font-medium mt-0.5"></p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button type="button" onclick="generateMultiSchedule()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-semibold px-3 py-2 rounded-lg border border-slate-600 transition">
+              Przelosuj uzupełnienie
+            </button>
+            <button type="button" onclick="exportCSV()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-3.5 py-2 rounded-lg shadow transition">
+              Pobierz CSV (Excel)
+            </button>
+            <button type="button" onclick="window.print()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-3.5 py-2 rounded-lg shadow transition">
+              Drukuj karty pojazdów (PDF / A4)
+            </button>
+          </div>
+        </div>
+
+        <div class="mt-3 mb-2 flex flex-wrap items-center gap-2">
+          <span class="text-xs text-slate-400">Widok tabeli:</span>
+          <div id="resultsViewTabs" class="flex flex-wrap gap-1.5"></div>
+        </div>
+
+        <div class="overflow-x-auto mt-2">
+          <table class="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr class="bg-slate-900 text-slate-300 border-b border-slate-700 uppercase text-[11px]">
+                <th class="py-2.5 px-2.5">Lp.</th>
+                <th class="py-2.5 px-2.5">Data</th>
+                <th class="py-2.5 px-2.5">Pojazd</th>
+                <th class="py-2.5 px-2.5">Kierowca</th>
+                <th class="py-2.5 px-2.5">Trasa / Cel wyjazdu</th>
+                <th class="py-2.5 px-2.5 text-right font-mono">Stan licznika: Od &rarr; Do</th>
+                <th class="py-2.5 px-2.5 text-right">Dystans (km)</th>
+                <th class="py-2.5 px-2 text-center">Usuń</th>
+              </tr>
+            </thead>
+            <tbody id="resultsTableBody" class="divide-y divide-slate-700/60 text-slate-200"></tbody>
+            <tfoot>
+              <tr class="bg-slate-900/90 font-bold text-slate-100 border-t-2 border-slate-600">
+                <td colspan="6" class="py-2.5 px-2.5 text-right uppercase text-[11px]" id="footLabel">Suma przejechanych kilometrów:</td>
+                <td id="footTotalKm" class="py-2.5 px-2.5 text-right font-mono text-emerald-400">0 km</td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
+      <div id="printContainer" class="print-only"></div>
+    </div>
+
+    <!-- ==================== ZAKŁADKA 3: PULA I LIMITY ==================== -->
+    <div id="tab-quotas" class="tab-content hidden space-y-5 no-print">
+      <div class="bg-slate-800 rounded-2xl border border-slate-700 p-4 sm:p-5 shadow-xl">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+          <div>
+            <h2 class="text-sm font-bold text-amber-400 uppercase tracking-wider">
+              Pula Losowania i Krotność Tras do Uzupełniania
+            </h2>
+            <p class="text-xs text-slate-300 mt-0.5">Określ krotność lokalizacji w trybie automatycznego uzupełniania braków.</p>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <button type="button" onclick="setAllQuotas('auto')" class="text-xs bg-blue-600/30 hover:bg-blue-600/50 text-blue-200 border border-blue-500/40 px-3 py-1.5 rounded-lg">
+              Ustaw wszystkie na: Auto
+            </button>
+            <button type="button" onclick="setAllQuotas('zero')" class="text-xs bg-slate-700 hover:bg-slate-600 text-slate-300 px-3 py-1.5 rounded-lg">
+              Wyzeruj wszystkie (0)
+            </button>
+          </div>
+        </div>
+
+        <div id="quotaSummaryBanner" class="bg-slate-900/90 border border-slate-700 rounded-xl p-3 mb-4 text-xs flex flex-wrap items-center justify-between gap-2">
+          <span id="quotaStatsText" class="text-slate-300">Ładowanie statystyk...</span>
+          <span class="text-slate-400">Braki kilometrów aplikacja uzupełni z tras <strong class="text-blue-400">Auto</strong>.</span>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr class="bg-slate-900 text-slate-300 border-b border-slate-700 uppercase text-[11px]">
+                <th class="py-2.5 px-3">Lokalizacja</th>
+                <th class="py-2.5 px-3 text-right">Dystans bazowy</th>
+                <th class="py-2.5 px-3">Tryb / Krotność</th>
+                <th class="py-2.5 px-3">Dokładna ilość</th>
+                <th class="py-2.5 px-3">Samochód</th>
+              </tr>
+            </thead>
+            <tbody id="quotasTableBody" class="divide-y divide-slate-700/60"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== ZAKŁADKA 4: POJAZDY ==================== -->
+    <div id="tab-vehicles" class="tab-content hidden space-y-5 no-print">
+      <div class="bg-slate-800 rounded-2xl border border-slate-700 p-5 shadow-xl">
+        <h2 class="text-sm font-bold text-blue-400 uppercase tracking-wider mb-1">Baza Samochodów</h2>
+        <p class="text-xs text-slate-400 mb-4">Zarządzaj flotą pojazdów.</p>
+
+        <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700 mb-5">
+          <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+            <input type="text" id="newVehName" placeholder="Marka i model">
+            <input type="text" id="newVehPlate" placeholder="Nr rej." class="uppercase">
+            <input type="number" id="newVehOdo" placeholder="Początkowy licznik">
+            <button type="button" onclick="addVehicle()" class="bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs px-4 py-2.5 rounded-lg transition">+ Dodaj</button>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead>
+              <tr class="bg-slate-900 text-slate-400 border-b border-slate-700">
+                <th class="py-2.5 px-3">Aktywny</th>
+                <th class="py-2.5 px-3">Model</th>
+                <th class="py-2.5 px-3">Rejestracja</th>
+                <th class="py-2.5 px-3">Okres</th>
+                <th class="py-2.5 px-3 text-right">Licznik</th>
+                <th class="py-2.5 px-3 text-right">Usuń</th>
+              </tr>
+            </thead>
+            <tbody id="vehiclesTableBody" class="divide-y divide-slate-700/60"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== ZAKŁADKA 5: KIEROWCY ==================== -->
+    <div id="tab-drivers" class="tab-content hidden space-y-5 no-print">
+      <div class="bg-slate-800 rounded-2xl border border-slate-700 p-5 shadow-xl">
+        <h2 class="text-sm font-bold text-blue-400 uppercase tracking-wider mb-1">Baza Kierowców</h2>
+        <p class="text-xs text-slate-400 mb-4">Zarządzaj zespołem kierowców.</p>
+
+        <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700 mb-5">
+          <div class="flex flex-col sm:flex-row gap-3">
+            <input type="text" id="newDriverName" placeholder="Imię i nazwisko..." class="flex-1">
+            <button type="button" onclick="addDriver()" class="bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs px-5 py-2.5 rounded-lg transition">+ Dodaj</button>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead>
+              <tr class="bg-slate-900 text-slate-400 border-b border-slate-700">
+                <th class="py-2.5 px-3">Aktywny</th>
+                <th class="py-2.5 px-3">Imię i Nazwisko</th>
+                <th class="py-2.5 px-3 text-right">Usuń</th>
+              </tr>
+            </thead>
+            <tbody id="driversTableBody" class="divide-y divide-slate-700/60"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== ZAKŁADKA 6: KALENDARZ ==================== -->
+    <div id="tab-calendar" class="tab-content hidden space-y-5 no-print">
+      <div class="bg-slate-800 rounded-2xl border border-slate-700 p-5 shadow-xl">
+        <h2 class="text-sm font-bold text-blue-400 uppercase tracking-wider mb-1">Kalendarz i Dni Robocze</h2>
+        <p class="text-xs text-slate-400 mb-4">Wybierz dni tygodnia lub wyłącz pojedyncze daty kliknięciem.</p>
+
+        <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700 mb-5">
+          <div class="text-xs font-semibold text-slate-300 uppercase mb-2.5">Aktywne dni tygodnia:</div>
+          <div class="flex flex-wrap gap-2 mb-4">
+            <button type="button" onclick="toggleDayOfWeek(1)" id="dow-1" class="px-3.5 py-2 rounded-lg text-xs font-bold bg-blue-600 text-white border border-blue-500">Pon</button>
+            <button type="button" onclick="toggleDayOfWeek(2)" id="dow-2" class="px-3.5 py-2 rounded-lg text-xs font-bold bg-blue-600 text-white border border-blue-500">Wt</button>
+            <button type="button" onclick="toggleDayOfWeek(3)" id="dow-3" class="px-3.5 py-2 rounded-lg text-xs font-bold bg-blue-600 text-white border border-blue-500">Śr</button>
+            <button type="button" onclick="toggleDayOfWeek(4)" id="dow-4" class="px-3.5 py-2 rounded-lg text-xs font-bold bg-blue-600 text-white border border-blue-500">Czw</button>
+            <button type="button" onclick="toggleDayOfWeek(5)" id="dow-5" class="px-3.5 py-2 rounded-lg text-xs font-bold bg-blue-600 text-white border border-blue-500">Pt</button>
+            <button type="button" onclick="toggleDayOfWeek(6)" id="dow-6" class="px-3.5 py-2 rounded-lg text-xs font-bold bg-slate-800 text-slate-400 border border-slate-700">Sob</button>
+            <button type="button" onclick="toggleDayOfWeek(0)" id="dow-0" class="px-3.5 py-2 rounded-lg text-xs font-bold bg-slate-800 text-slate-400 border border-slate-700">Niedz</button>
+          </div>
+          
+          <div class="flex flex-wrap gap-2">
+            <button type="button" onclick="excludePolishHolidays()" class="bg-slate-800 hover:bg-slate-700 text-xs text-amber-300 border border-amber-500/40 px-3.5 py-2 rounded-lg transition">Wyłącz Święta PL</button>
+            <button type="button" onclick="clearManualExclusions()" class="bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 border border-slate-600 px-3.5 py-2 rounded-lg transition">Reset wyłączeń</button>
+          </div>
+        </div>
+
+        <div>
+          <div class="flex justify-between items-center mb-2">
+            <h3 class="text-xs font-semibold text-slate-300 uppercase">Siatka dni (kliknij, by wyłączyć):</h3>
+            <span id="activeDaysCount" class="text-xs text-emerald-400 font-bold">0 dni</span>
+          </div>
+          <div id="calendarGrid" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-2 max-h-96 overflow-y-auto p-2.5 bg-slate-900/60 rounded-xl border border-slate-700"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== ZAKŁADKA 7: BAZA TRAS ==================== -->
+    <div id="tab-routes" class="tab-content hidden space-y-5 no-print">
+      <div class="bg-slate-800 rounded-2xl border border-slate-700 p-5 shadow-xl">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+          <div>
+            <h2 class="text-sm font-bold text-blue-400 uppercase tracking-wider">Baza Lokalizacji RCKiK</h2>
+            <p class="text-xs text-slate-400">Zarządzaj bazą tras.</p>
+          </div>
+          <button type="button" onclick="resetDefaultRoutes()" class="text-xs bg-slate-700 hover:bg-slate-600 text-slate-200 px-3 py-1.5 rounded-lg">Przywróć domyślne</button>
+        </div>
+
+        <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700 mb-5">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <input type="text" id="newRouteName" placeholder="Nazwa lokalizacji">
+            <input type="number" id="newRouteKm" placeholder="Dystans w 1 stronę (km)">
+            <button type="button" onclick="addRoute()" class="bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs px-4 py-2.5 rounded-lg transition">+ Dodaj</button>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead>
+              <tr class="bg-slate-900 text-slate-400 border-b border-slate-700">
+                <th class="py-2.5 px-3">Lp.</th>
+                <th class="py-2.5 px-3">Lokalizacja</th>
+                <th class="py-2.5 px-3 text-right">1 strona</th>
+                <th class="py-2.5 px-3 text-right">Tam i z powrotem</th>
+                <th class="py-2.5 px-3 text-right">Z narzutem 10%</th>
+                <th class="py-2.5 px-3 text-right">Usuń</th>
+              </tr>
+            </thead>
+            <tbody id="routesTableBody" class="divide-y divide-slate-700/60"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    function getCurrentMonthBounds() {
+      const now = new Date();
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, '0');
+      const lastDayNum = new Date(yyyy, now.getMonth() + 1, 0).getDate();
+      return {
+        firstDay: `${yyyy}-${mm}-01`,
+        lastDay: `${yyyy}-${mm}-${String(lastDayNum).padStart(2, '0')}`
+      };
+    }
+
+    const safeStorage = {
+      get: function(key, fallback) {
+        try {
+          const item = window.localStorage.getItem(key);
+          if (!item) return fallback;
+          const parsed = JSON.parse(item);
+          return (Array.isArray(parsed) && parsed.length === 0) ? fallback : parsed;
+        } catch (err) {
+          return fallback;
+        }
+      },
+      set: function(key, value) {
+        try {
+          window.localStorage.setItem(key, JSON.stringify(value));
+        } catch (err) {}
+      }
+    };
+
+    const monthBounds = getCurrentMonthBounds();
+
+    const DEFAULT_VEHICLES = [
+      { id: 1, name: "Opel Movano", plate: "WU 4395R", selected: true, startOdo: 142000, endOdo: 145200, targetKm: 3200, dateFrom: monthBounds.firstDay, dateTo: monthBounds.lastDay },
+      { id: 2, name: "Renault Master", plate: "WU 4724L", selected: true, startOdo: 185000, endOdo: 187900, targetKm: 2900, dateFrom: monthBounds.firstDay, dateTo: monthBounds.lastDay }
+    ];
+
+    const DEFAULT_DRIVERS = [
+      { id: 1, name: "Marek Kwiecień", active: true },
+      { id: 2, name: "Bartosz Miller", active: true },
+      { id: 3, name: "Kamil Ciężko", active: true },
+      { id: 4, name: "Kacper Górka", active: true }
+    ];
+
+    const DEFAULT_ROUTES = [
+      { id: 1, name: "Rckik Łódź", km: 160, mode: "auto", count: 2, assignTo: "ALL" },
+      { id: 2, name: "rckik Gdańsk", km: 370, mode: "auto", count: 1, assignTo: "ALL" },
+      { id: 3, name: "rckik Kielce", km: 180, mode: "auto", count: 2, assignTo: "ALL" },
+      { id: 4, name: "rckik Kalisz", km: 260, mode: "auto", count: 1, assignTo: "ALL" },
+      { id: 5, name: "rckik Rzeszów", km: 360, mode: "auto", count: 1, assignTo: "ALL" },
+      { id: 6, name: "rckik Olsztyn", km: 330, mode: "auto", count: 1, assignTo: "ALL" },
+      { id: 7, name: "Ckik", km: 15, mode: "auto", count: 3, assignTo: "ALL" },
+      { id: 8, name: "rckik Warszawa", km: 25, mode: "auto", count: 5, assignTo: "ALL" },
+      { id: 9, name: "rckik Siedlce", km: 125, mode: "auto", count: 2, assignTo: "ALL" },
+      { id: 10, name: "rckik Garwolin", km: 95, mode: "auto", count: 2, assignTo: "ALL" },
+      { id: 11, name: "rckik Katowice", km: 325, mode: "auto", count: 1, assignTo: "ALL" },
+      { id: 12, name: "rckik Białystok", km: 210, mode: "auto", count: 2, assignTo: "ALL" },
+      { id: 13, name: "rckik Szczecin", km: 560, mode: "auto", count: 1, assignTo: "ALL" },
+      { id: 14, name: "rckik Saska + ckik", km: 30, mode: "auto", count: 3, assignTo: "ALL" },
+      { id: 15, name: "rckik Siedlce + Garwolin", km: 145, mode: "auto", count: 2, assignTo: "ALL" }
+    ];
+
+    let state = {
+      vehicles: safeStorage.get("ak_vehicles_v8", JSON.parse(JSON.stringify(DEFAULT_VEHICLES))),
+      drivers: safeStorage.get("ak_drivers_v8", JSON.parse(JSON.stringify(DEFAULT_DRIVERS))),
+      routes: safeStorage.get("ak_routes_v8", JSON.parse(JSON.stringify(DEFAULT_ROUTES))),
+      manualEntries: safeStorage.get("ak_manual_v8", []),
+      activeDaysOfWeek: [1, 2, 3, 4, 5],
+      excludedDates: new Set(),
+      generatedRows: [],
+      resultsFilterVehicleId: "ALL"
+    };
+
+    state.vehicles.forEach(v => {
+      if (typeof v.selected === "undefined") v.selected = true;
+      if (typeof v.startOdo === "undefined") v.startOdo = 120000;
+      if (typeof v.targetKm === "undefined") v.targetKm = 3000;
+      if (typeof v.endOdo === "undefined") v.endOdo = v.startOdo + v.targetKm;
+      if (!v.dateFrom) v.dateFrom = monthBounds.firstDay;
+      if (!v.dateTo) v.dateTo = monthBounds.lastDay;
+    });
+    state.routes.forEach(r => {
+      if (!r.mode) r.mode = "auto";
+      if (typeof r.count === "undefined") r.count = 1;
+      if (!r.assignTo) r.assignTo = "ALL";
+    });
+
+    function saveState() {
+      safeStorage.set("ak_vehicles_v8", state.vehicles);
+      safeStorage.set("ak_drivers_v8", state.drivers);
+      safeStorage.set("ak_routes_v8", state.routes);
+      safeStorage.set("ak_manual_v8", state.manualEntries);
+      updateBadges();
+    }
+
+    function updateBadges() {
+      document.getElementById("badge-vehicles").textContent = state.vehicles.filter(v => v.selected).length + "/" + state.vehicles.length;
+      document.getElementById("badge-drivers").textContent = state.drivers.filter(d => d.active).length;
+      document.getElementById("badge-routes").textContent = state.routes.filter(r => r.mode !== 'off').length;
+    }
+
+    window.addEventListener("DOMContentLoaded", function() {
+      document.getElementById("globalDateFrom").value = monthBounds.firstDay;
+      document.getElementById("globalDateTo").value = monthBounds.lastDay;
+      document.getElementById("manualDate").value = monthBounds.firstDay;
+
+      renderManualJournal();
+      renderVehicles();
+      renderQuotasTable();
+      renderDrivers();
+      renderRoutes();
+      renderCalendarGrid();
+      updateBadges();
+    });
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.getElementById(tabId).classList.remove('hidden');
+
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('bg-blue-600', 'text-white', 'shadow');
+        if (btn.id === 'btn-tab-quotas') {
+          btn.classList.add('text-amber-300');
+        } else {
+          btn.classList.add('text-slate-300');
+        }
+      });
+      const activeBtn = document.getElementById('btn-' + tabId);
+      if (activeBtn) {
+        activeBtn.classList.add('bg-blue-600', 'text-white', 'shadow');
+        activeBtn.classList.remove('text-slate-300', 'text-amber-300');
+      }
+      renderManualJournal();
+      renderVehicles();
+      renderQuotasTable();
+      renderCalendarGrid();
+    }
+
+    function resetAllToDefaults() {
+      if (confirm("Zresetować aplikację do stanu początkowego?")) {
+        state.vehicles = JSON.parse(JSON.stringify(DEFAULT_VEHICLES));
+        state.drivers = JSON.parse(JSON.stringify(DEFAULT_DRIVERS));
+        state.routes = JSON.parse(JSON.stringify(DEFAULT_ROUTES));
+        state.manualEntries = [];
+        state.excludedDates.clear();
+        saveState();
+        renderManualJournal();
+        renderVehicles();
+        renderQuotasTable();
+        renderDrivers();
+        renderRoutes();
+        renderCalendarGrid();
+      }
+    }
+
+    // =========================================================================
+    // OBSŁUGA DZIENNIKA RZECZYWISTEGO (ZAKŁADKA 1)
+    // =========================================================================
+    function renderManualJournal() {
+      // Wypełnij selecty aut i kierowców w formularzu dziennika
+      const vehSelect = document.getElementById("manualVehicle");
+      const drvSelect = document.getElementById("manualDriver");
+      if (vehSelect) {
+        const curV = vehSelect.value;
+        vehSelect.innerHTML = "";
+        state.vehicles.forEach(v => {
+          const opt = document.createElement("option");
+          opt.value = v.id;
+          opt.textContent = `${v.name} [${v.plate}]`;
+          vehSelect.appendChild(opt);
+        });
+        if (curV) vehSelect.value = curV;
+      }
+      if (drvSelect) {
+        const curD = drvSelect.value;
+        drvSelect.innerHTML = "";
+        state.drivers.forEach(d => {
+          const opt = document.createElement("option");
+          opt.value = d.name;
+          opt.textContent = d.name;
+          drvSelect.appendChild(opt);
+        });
+        if (curD) drvSelect.value = curD;
+      }
+
+      // Tabela wpisów
+      const tbody = document.getElementById("manualTableBody");
+      if (!tbody) return;
+      tbody.innerHTML = "";
+
+      if (state.manualEntries.length === 0) {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td colspan="6" class="py-4 text-center text-slate-500 italic">Brak wpisanych rzeczywistych tras. Dodaj powyżej to, co pamiętasz z jazdy.</td>`;
+        tbody.appendChild(tr);
+        return;
+      }
+
+      state.manualEntries.sort((a, b) => a.date.localeCompare(b.date));
+      state.manualEntries.forEach((entry, idx) => {
+        const vObj = state.vehicles.find(v => v.id == entry.vehicleId);
+        const vLabel = vObj ? `${vObj.name} [${vObj.plate}]` : "Auto nieznane";
+        const tr = document.createElement("tr");
+        tr.className = "hover:bg-slate-700/30";
+        tr.innerHTML = `
+          <td class="py-2.5 px-3 font-mono font-semibold text-white">${entry.date}</td>
+          <td class="py-2.5 px-3 text-blue-300">${vLabel}</td>
+          <td class="py-2.5 px-3 text-amber-300">${entry.driverName}</td>
+          <td class="py-2.5 px-3 font-medium">${entry.route}</td>
+          <td class="py-2.5 px-3 text-right font-mono font-bold text-emerald-400">${entry.km} km</td>
+          <td class="py-2.5 px-3 text-right"><button type="button" onclick="removeManualEntry(${entry.id})" class="text-rose-400 hover:text-rose-300 font-bold px-1.5">✕</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function addManualEntry() {
+      const date = document.getElementById("manualDate").value;
+      const vehicleId = parseInt(document.getElementById("manualVehicle").value, 10);
+      const driverName = document.getElementById("manualDriver").value;
+      const route = document.getElementById("manualRoute").value.trim();
+      const km = parseInt(document.getElementById("manualKm").value, 10);
+
+      if (!date) return alert("Wybierz datę wyjazdu.");
+      if (!route) return alert("Wpisz cel lub trasę wyjazdu.");
+      if (isNaN(km) || km <= 0) return alert("Wpisz poprawny dystans w km.");
+
+      state.manualEntries.push({
+        id: Date.now(),
+        date,
+        vehicleId,
+        driverName,
+        route,
+        km
+      });
+      saveState();
+      renderManualJournal();
+      document.getElementById("manualRoute").value = "";
+      document.getElementById("manualKm").value = "";
+    }
+
+    function removeManualEntry(id) {
+      state.manualEntries = state.manualEntries.filter(e => e.id !== id);
+      saveState();
+      renderManualJournal();
+    }
+
+    // =========================================================================
+    // FUNKCJE DAT I POMOCNICZE
+    // =========================================================================
+    function parseLocalIso(isoStr) {
+      if (!isoStr) return new Date();
+      const parts = isoStr.split("-");
+      return new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+    }
+
+    function formatIso(dateObj) {
+      const y = dateObj.getFullYear();
+      const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+      const d = String(dateObj.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+
+    function getDatesInRange(startStr, endStr) {
+      if (!startStr || !endStr) return [];
+      const arr = [];
+      let curr = parseLocalIso(startStr);
+      const end = parseLocalIso(endStr);
+      if (curr > end) return [];
+      while (curr <= end) {
+        arr.push(new Date(curr));
+        curr.setDate(curr.getDate() + 1);
+      }
+      return arr;
+    }
+
+    function getActiveDatesForVehicle(veh) {
+      const all = getDatesInRange(veh.dateFrom, veh.dateTo);
+      return all.filter(d => {
+        const iso = formatIso(d);
+        return state.activeDaysOfWeek.includes(d.getDay()) && !state.excludedDates.has(iso);
+      });
+    }
+
+    function getGlobalCalendarSpan() {
+      const selected = state.vehicles.filter(v => v.selected);
+      const list = selected.length > 0 ? selected : state.vehicles;
+      let minFrom = list[0]?.dateFrom || monthBounds.firstDay;
+      let maxTo = list[0]?.dateTo || monthBounds.lastDay;
+
+      list.forEach(v => {
+        if (v.dateFrom && v.dateFrom < minFrom) minFrom = v.dateFrom;
+        if (v.dateTo && v.dateTo > maxTo) maxTo = v.dateTo;
+      });
+      return { minFrom, maxTo };
+    }
+
+    function applyGlobalDatesToAllVehicles() {
+      const gFrom = document.getElementById("globalDateFrom").value;
+      const gTo = document.getElementById("globalDateTo").value;
+      if (!gFrom || !gTo || gFrom > gTo) return alert("Wybierz poprawny zakres dat.");
+      state.vehicles.forEach(v => { v.dateFrom = gFrom; v.dateTo = gTo; });
+      saveState(); renderVehicles(); renderCalendarGrid();
+    }
+
+    function toggleVehicleSelection(id) {
+      const v = state.vehicles.find(x => x.id == id);
+      if (v) v.selected = !v.selected;
+      saveState(); renderVehicles(); renderQuotasTable(); renderCalendarGrid();
+    }
+
+    function selectAllVehicles(val) {
+      state.vehicles.forEach(v => v.selected = val);
+      saveState(); renderVehicles(); renderQuotasTable(); renderCalendarGrid();
+    }
+
+    function onVehicleDateChange(vehId, field, value) {
+      const v = state.vehicles.find(x => x.id == vehId);
+      if (!v) return;
+      if (field === 'from') v.dateFrom = value;
+      if (field === 'to') v.dateTo = value;
+      saveState(); renderVehicles(); renderCalendarGrid();
+    }
+
+    function onVehicleOdoChange(vehId, field, value) {
+      const v = state.vehicles.find(x => x.id == vehId);
+      if (!v) return;
+      const num = parseInt(value, 10) || 0;
+      if (field === 'start') {
+        v.startOdo = num;
+        if (v.endOdo >= v.startOdo) v.targetKm = v.endOdo - v.startOdo;
+        else v.endOdo = v.startOdo + v.targetKm;
+      } else if (field === 'end') {
+        v.endOdo = num;
+        if (v.endOdo >= v.startOdo) v.targetKm = v.endOdo - v.startOdo;
+      } else if (field === 'target') {
+        v.targetKm = num;
+        v.endOdo = v.startOdo + v.targetKm;
+      }
+      saveState();
+      const sInput = document.getElementById(`v-start-${vehId}`);
+      const eInput = document.getElementById(`v-end-${vehId}`);
+      const tInput = document.getElementById(`v-target-${vehId}`);
+      if (field !== 'start' && sInput) sInput.value = v.startOdo;
+      if (field !== 'end' && eInput) eInput.value = v.endOdo;
+      if (field !== 'target' && tInput) tInput.value = v.targetKm;
+    }
+
+    function renderVehicles() {
+      const container = document.getElementById("multiVehiclesContainer");
+      if (container) {
+        container.innerHTML = "";
+        state.vehicles.forEach(v => {
+          const activeDays = getActiveDatesForVehicle(v).length;
+          const card = document.createElement("div");
+          card.className = `veh-card ${v.selected ? 'selected' : 'opacity-60'} p-4 rounded-xl`;
+          card.innerHTML = `
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-3 pb-2.5 border-b border-slate-700/80">
+              <label class="flex items-center gap-2.5 cursor-pointer select-none">
+                <input type="checkbox" ${v.selected ? 'checked' : ''} onchange="toggleVehicleSelection(${v.id})" class="w-4 h-4 rounded text-blue-600">
+                <div>
+                  <span class="text-sm font-bold text-white">${v.name}</span>
+                  <span class="ml-1.5 text-xs font-mono bg-slate-800 text-blue-300 border border-slate-600 px-2 py-0.5 rounded">${v.plate}</span>
+                </div>
+              </label>
+              <div class="flex items-center gap-2">
+                <span class="text-[11px] bg-slate-800 border border-slate-700 px-2 py-0.5 rounded text-slate-300 font-mono">
+                  Dni roboczych: <strong class="${activeDays > 0 ? 'text-emerald-400' : 'text-rose-400'}">${activeDays}</strong>
+                </span>
+                <span class="text-[11px] font-semibold ${v.selected ? 'text-emerald-400' : 'text-slate-500'}">${v.selected ? 'Aktywny' : 'Pominięty'}</span>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-3 bg-slate-900/80 p-2.5 rounded-lg border border-slate-800">
+              <div>
+                <label class="block text-[11px] text-blue-300 font-semibold mb-1">Data od</label>
+                <input type="date" value="${v.dateFrom}" ${!v.selected ? 'disabled' : ''} onchange="onVehicleDateChange(${v.id}, 'from', this.value)" class="w-full text-xs">
+              </div>
+              <div>
+                <label class="block text-[11px] text-blue-300 font-semibold mb-1">Data do</label>
+                <input type="date" value="${v.dateTo}" ${!v.selected ? 'disabled' : ''} onchange="onVehicleDateChange(${v.id}, 'to', this.value)" class="w-full text-xs">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2.5">
+              <div>
+                <label class="block text-[11px] text-slate-400 mb-1">Licznik początkowy</label>
+                <input type="number" id="v-start-${v.id}" value="${v.startOdo}" ${!v.selected ? 'disabled' : ''} oninput="onVehicleOdoChange(${v.id}, 'start', this.value)" class="w-full font-mono text-xs">
+              </div>
+              <div>
+                <label class="block text-[11px] text-slate-400 mb-1">Licznik końcowy</label>
+                <input type="number" id="v-end-${v.id}" value="${v.endOdo}" ${!v.selected ? 'disabled' : ''} oninput="onVehicleOdoChange(${v.id}, 'end', this.value)" class="w-full font-mono text-xs">
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-emerald-400 mb-1">Do przejechania (km)</label>
+                <input type="number" id="v-target-${v.id}" value="${v.targetKm}" ${!v.selected ? 'disabled' : ''} oninput="onVehicleOdoChange(${v.id}, 'target', this.value)" class="w-full font-mono font-bold text-emerald-400 border-emerald-500/50 text-xs">
+              </div>
+            </div>
+          `;
+          container.appendChild(card);
+        });
+      }
+
+      const tbody = document.getElementById("vehiclesTableBody");
+      if (tbody) {
+        tbody.innerHTML = "";
+        state.vehicles.forEach(v => {
+          const tr = document.createElement("tr");
+          tr.className = "hover:bg-slate-700/30";
+          tr.innerHTML = `
+            <td class="py-2.5 px-3"><input type="checkbox" ${v.selected ? 'checked' : ''} onchange="toggleVehicleSelection(${v.id})" class="w-4 h-4 rounded"></td>
+            <td class="py-2.5 px-3 font-bold text-white">${v.name}</td>
+            <td class="py-2.5 px-3 font-mono text-blue-300 font-semibold">${v.plate}</td>
+            <td class="py-2.5 px-3 font-mono text-slate-300 text-xs">${v.dateFrom} &rarr; ${v.dateTo}</td>
+            <td class="py-2.5 px-3 text-right font-mono text-slate-300">${v.startOdo} km</td>
+            <td class="py-2.5 px-3 text-right"><button type="button" onclick="deleteVehicle(${v.id})" class="text-rose-400 hover:text-rose-300 px-2 py-1">Usuń</button></td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+      updateBadges();
+    }
+
+    function addVehicle() {
+      const nameEl = document.getElementById("newVehName");
+      const plateEl = document.getElementById("newVehPlate");
+      const odoEl = document.getElementById("newVehOdo");
+      const name = nameEl.value.trim(), plate = plateEl.value.trim().toUpperCase();
+      const startOdo = parseInt(odoEl.value, 10) || 100000;
+      if (!name || !plate) return alert("Wpisz markę i nr rej.");
+      state.vehicles.push({
+        id: Date.now(), name, plate, selected: true, startOdo, endOdo: startOdo + 2500, targetKm: 2500,
+        dateFrom: monthBounds.firstDay, dateTo: monthBounds.lastDay
+      });
+      saveState(); renderVehicles(); renderQuotasTable(); renderCalendarGrid();
+      nameEl.value = ""; plateEl.value = ""; odoEl.value = "";
+    }
+
+    function deleteVehicle(id) {
+      if (state.vehicles.length <= 1) return alert("Musi pozostać min. 1 auto.");
+      state.vehicles = state.vehicles.filter(v => v.id !== id);
+      state.routes.forEach(r => { if (r.assignTo == id) r.assignTo = "ALL"; });
+      saveState(); renderVehicles(); renderQuotasTable(); renderCalendarGrid();
+    }
+
+    function setRouteQuotaMode(routeId, mode, exactCount) {
+      const r = state.routes.find(x => x.id === routeId);
+      if (!r) return;
+      r.mode = mode;
+      if (typeof exactCount === "number") r.count = exactCount;
+      saveState(); renderQuotasTable();
+    }
+
+    function onRouteExactCountInput(routeId, val) {
+      const r = state.routes.find(x => x.id === routeId);
+      if (!r) return;
+      const num = parseInt(val, 10);
+      if (isNaN(num) || num <= 0) { r.mode = 'off'; r.count = 0; }
+      else { r.mode = 'fixed'; r.count = num; }
+      saveState(); renderQuotasTable();
+    }
+
+    function onRouteAssignChange(routeId, assignVal) {
+      const r = state.routes.find(x => x.id === routeId);
+      if (!r) return;
+      r.assignTo = assignVal;
+      saveState(); renderQuotasTable();
+    }
+
+    function setAllQuotas(mode) {
+      state.routes.forEach(r => {
+        if (mode === 'auto') r.mode = 'auto';
+        else if (mode === 'zero') { r.mode = 'off'; r.count = 0; }
+      });
+      saveState(); renderQuotasTable();
+    }
+
+    function renderQuotasTable() {
+      const tbody = document.getElementById("quotasTableBody");
+      if (!tbody) return;
+      const isRoundTrip = document.getElementById("optRoundTrip") ? document.getElementById("optRoundTrip").checked : true;
+      const mult = isRoundTrip ? 2 : 1;
+
+      tbody.innerHTML = "";
+      let fixedTripsCount = 0, fixedKmSum = 0, autoRoutesCount = 0;
+
+      state.routes.forEach(r => {
+        const baseDist = r.km * mult;
+        if (r.mode === 'fixed' && r.count > 0) { fixedTripsCount += r.count; fixedKmSum += baseDist * r.count; }
+        else if (r.mode === 'auto') { autoRoutesCount++; }
+
+        const vehicleOptions = [
+          `<option value="ALL" ${r.assignTo === 'ALL' ? 'selected' : ''}>Wszystkie auta (Wspólnie)</option>`,
+          ...state.vehicles.map(v => `<option value="${v.id}" ${String(r.assignTo) === String(v.id) ? 'selected' : ''}>Tylko: ${v.name} [${v.plate}]</option>`)
+        ].join('');
+
+        const isOff = r.mode === 'off' || (r.mode === 'fixed' && r.count === 0);
+        const isAuto = r.mode === 'auto';
+        const isFixed = r.mode === 'fixed' && r.count > 0;
+
+        const tr = document.createElement("tr");
+        tr.className = `transition ${isOff ? 'opacity-50 bg-slate-900/40' : 'hover:bg-slate-700/30'}`;
+        tr.innerHTML = `
+          <td class="py-2.5 px-3 font-semibold text-white">${r.name}</td>
+          <td class="py-2.5 px-3 text-right font-mono text-slate-300">${baseDist} km</td>
+          <td class="py-2.5 px-3">
+            <div class="flex flex-wrap gap-1">
+              <button type="button" onclick="setRouteQuotaMode(${r.id}, 'off', 0)" class="px-2 py-1 rounded text-[11px] font-bold border ${isOff ? 'bg-rose-600 text-white border-rose-500' : 'bg-slate-900 text-slate-400 border-slate-700'}">0</button>
+              <button type="button" onclick="setRouteQuotaMode(${r.id}, 'fixed', 1)" class="px-2 py-1 rounded text-[11px] font-bold border ${isFixed && r.count === 1 ? 'bg-amber-500 text-slate-950 border-amber-400' : 'bg-slate-900 text-slate-300 border-slate-700'}">1x</button>
+              <button type="button" onclick="setRouteQuotaMode(${r.id}, 'fixed', 2)" class="px-2 py-1 rounded text-[11px] font-bold border ${isFixed && r.count === 2 ? 'bg-amber-500 text-slate-950 border-amber-400' : 'bg-slate-900 text-slate-300 border-slate-700'}">2x</button>
+              <button type="button" onclick="setRouteQuotaMode(${r.id}, 'fixed', 5)" class="px-2 py-1 rounded text-[11px] font-bold border ${isFixed && r.count === 5 ? 'bg-amber-500 text-slate-950 border-amber-400' : 'bg-slate-900 text-slate-300 border-slate-700'}">5x</button>
+              <button type="button" onclick="setRouteQuotaMode(${r.id}, 'auto')" class="px-2.5 py-1 rounded text-[11px] font-bold border ${isAuto ? 'bg-blue-600 text-white border-blue-500' : 'bg-slate-900 text-slate-300 border-slate-700'}">Auto</button>
+            </div>
+          </td>
+          <td class="py-2.5 px-3">
+            ${isAuto ? `<span class="text-xs text-blue-400 font-semibold">Auto</span>` : `<input type="number" min="0" max="50" value="${isOff ? 0 : r.count}" onchange="onRouteExactCountInput(${r.id}, this.value)" class="w-16 font-mono text-center py-1">`}
+          </td>
+          <td class="py-2.5 px-3"><select onchange="onRouteAssignChange(${r.id}, this.value)" ${isOff ? 'disabled' : ''} class="w-full py-1 text-xs">${vehicleOptions}</select></td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      const statsEl = document.getElementById("quotaStatsText");
+      if (statsEl) {
+        statsEl.innerHTML = `Sztywne: <strong class="text-amber-400">${fixedTripsCount} wyjazdów (${fixedKmSum} km)</strong> | Elastyczne (Auto): <strong class="text-blue-400">${autoRoutesCount} tras</strong>`;
+      }
+      updateBadges();
+    }
+
+    function renderDrivers() {
+      const tbody = document.getElementById("driversTableBody");
+      if (!tbody) return;
+      tbody.innerHTML = "";
+      state.drivers.forEach(d => {
+        const tr = document.createElement("tr");
+        tr.className = "hover:bg-slate-700/30";
+        tr.innerHTML = `
+          <td class="py-2.5 px-3"><input type="checkbox" ${d.active ? 'checked' : ''} onchange="toggleDriver(${d.id})" class="w-4 h-4 rounded"></td>
+          <td class="py-2.5 px-3 font-medium text-white">${d.name}</td>
+          <td class="py-2.5 px-3 text-right"><button type="button" onclick="deleteDriver(${d.id})" class="text-rose-400 hover:text-rose-300 px-2 py-1">Usuń</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+      updateBadges();
+    }
+
+    function addDriver() {
+      const el = document.getElementById("newDriverName");
+      const name = el.value.trim();
+      if (!name) return alert("Podaj imię.");
+      state.drivers.push({ id: Date.now(), name, active: true });
+      saveState(); renderDrivers(); el.value = "";
+    }
+
+    function toggleDriver(id) {
+      const d = state.drivers.find(x => x.id === id);
+      if (d) d.active = !d.active;
+      saveState(); renderDrivers();
+    }
+
+    function deleteDriver(id) {
+      if (state.drivers.length <= 1) return alert("Musi pozostać min. 1 kierowca.");
+      state.drivers = state.drivers.filter(d => d.id !== id);
+      saveState(); renderDrivers();
+    }
+
+    function toggleDayOfWeek(dow) {
+      const idx = state.activeDaysOfWeek.indexOf(dow);
+      const dayLabels = ["Niedziela", "Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek", "Sobota"];
+      const btn = document.getElementById(`dow-${dow}`);
+      if (idx > -1) {
+        state.activeDaysOfWeek.splice(idx, 1);
+        btn.className = "px-3.5 py-2 rounded-lg text-xs font-bold bg-slate-800 text-slate-400 border border-slate-700";
+        btn.textContent = `${dayLabels[dow].slice(0, 3)} (Wył.)`;
+      } else {
+        state.activeDaysOfWeek.push(dow);
+        btn.className = "px-3.5 py-2 rounded-lg text-xs font-bold bg-blue-600 text-white border border-blue-500";
+        btn.textContent = dayLabels[dow].slice(0, 3);
+      }
+      renderVehicles(); renderCalendarGrid();
+    }
+
+    function renderCalendarGrid() {
+      const { minFrom, maxTo } = getGlobalCalendarSpan();
+      const dates = getDatesInRange(minFrom, maxTo);
+      const grid = document.getElementById("calendarGrid");
+      if (!grid) return;
+      grid.innerHTML = "";
+
+      let activeCount = 0;
+      const dayNames = ["Ndz", "Pon", "Wt", "Śr", "Czw", "Pt", "Sob"];
+      const selectedVehicles = state.vehicles.filter(v => v.selected);
+
+      dates.forEach(d => {
+        const iso = formatIso(d);
+        const dow = d.getDay();
+        const isDowActive = state.activeDaysOfWeek.includes(dow);
+        const isManuallyExcluded = state.excludedDates.has(iso);
+        const isActive = isDowActive && !isManuallyExcluded;
+
+        if (isActive) activeCount++;
+        const activeCarsOnDay = selectedVehicles.filter(v => iso >= v.dateFrom && iso <= v.dateTo);
+        const carsBadge = activeCarsOnDay.length > 0 ? activeCarsOnDay.map(v => v.plate.split(' ')[1] || v.name.slice(0, 4)).join(', ') : 'Brak';
+
+        const div = document.createElement("div");
+        div.className = `p-2 rounded-lg border text-center cursor-pointer select-none transition ${isActive ? 'bg-blue-900/30 border-blue-500/50 text-blue-100 hover:bg-blue-800/40' : 'bg-slate-900 border-slate-800 text-slate-500 line-through'}`;
+        div.innerHTML = `
+          <div class="text-[10px] uppercase font-semibold">${dayNames[dow]}</div>
+          <div class="text-xs font-bold">${iso.slice(5)}</div>
+          <div class="text-[9px] mt-0.5 text-slate-400 truncate">${isActive ? carsBadge : 'Wolny'}</div>
+        `;
+        div.onclick = () => {
+          if (!isDowActive) return;
+          if (state.excludedDates.has(iso)) state.excludedDates.delete(iso);
+          else state.excludedDates.add(iso);
+          renderVehicles(); renderCalendarGrid();
+        };
+        grid.appendChild(div);
+      });
+
+      document.getElementById("activeDaysCount").textContent = `${activeCount} aktywnych dni`;
+    }
+
+    function excludePolishHolidays() {
+      const { minFrom, maxTo } = getGlobalCalendarSpan();
+      getDatesInRange(minFrom, maxTo).forEach(d => {
+        const m = d.getMonth() + 1, day = d.getDate();
+        if ((m === 1 && (day === 1 || day === 6)) || (m === 5 && (day === 1 || day === 3)) || (m === 8 && day === 15) || (m === 11 && (day === 1 || day === 11)) || (m === 12 && (day === 24 || day === 25 || day === 26))) {
+          state.excludedDates.add(formatIso(d));
+        }
+      });
+      renderVehicles(); renderCalendarGrid();
+    }
+
+    function clearManualExclusions() {
+      state.excludedDates.clear();
+      renderVehicles(); renderCalendarGrid();
+    }
+
+    function renderRoutes() {
+      const tbody = document.getElementById("routesTableBody");
+      if (!tbody) return;
+      tbody.innerHTML = "";
+      state.routes.forEach((r, idx) => {
+        const roundTrip = r.km * 2;
+        const maxWithSpread = Math.round(roundTrip * 1.10);
+        const tr = document.createElement("tr");
+        tr.className = "hover:bg-slate-700/30";
+        tr.innerHTML = `
+          <td class="py-2.5 px-3 text-slate-400 font-mono">${idx + 1}</td>
+          <td class="py-2.5 px-3 font-semibold text-white">${r.name}</td>
+          <td class="py-2.5 px-3 text-right font-mono text-slate-300">${r.km} km</td>
+          <td class="py-2.5 px-3 text-right font-mono text-blue-300 font-semibold">${roundTrip} km</td>
+          <td class="py-2.5 px-3 text-right font-mono text-emerald-400">${roundTrip} &ndash; ${maxWithSpread} km</td>
+          <td class="py-2.5 px-3 text-right"><button type="button" onclick="deleteRoute(${r.id})" class="text-rose-400 hover:text-rose-300 px-2 py-1">Usuń</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+      updateBadges();
+    }
+
+    function addRoute() {
+      const nameEl = document.getElementById("newRouteName");
+      const kmEl = document.getElementById("newRouteKm");
+      const name = nameEl.value.trim(), km = parseFloat(kmEl.value);
+      if (!name || isNaN(km) || km <= 0) return alert("Podaj nazwę i dystans.");
+      state.routes.push({ id: Date.now(), name, km: Math.round(km), mode: "auto", count: 1, assignTo: "ALL" });
+      saveState(); renderRoutes(); renderQuotasTable();
+      nameEl.value = ""; kmEl.value = "";
+    }
+
+    function deleteRoute(id) {
+      if (state.routes.length <= 1) return alert("Musi pozostać min. 1 trasa.");
+      state.routes = state.routes.filter(r => r.id !== id);
+      saveState(); renderRoutes(); renderQuotasTable();
+    }
+
+    function resetDefaultRoutes() {
+      if (confirm("Przywrócić domyślne trasy?")) {
+        state.routes = JSON.parse(JSON.stringify(DEFAULT_ROUTES));
+        saveState(); renderRoutes(); renderQuotasTable();
+      }
+    }
+
+    function createTripInstance(routeObj, mult, useRandomSpread) {
+      const baseKm = routeObj.km * mult;
+      const randPct = useRandomSpread ? (Math.random() * 0.10) : 0;
+      const actualKm = Math.round(baseKm * (1 + randPct));
+      const maxKm = useRandomSpread ? Math.round(baseKm * 1.10) : baseKm;
+      return { routeId: routeObj.id, routeName: routeObj.name, baseKm, maxKm, km: actualKm };
+    }
+
+    // =========================================================================
+    // HYBRYDOWY SOLVER: DZIENNIK + UZUPEŁNIANIE BRAKÓW
+    // =========================================================================
+    function generateMultiSchedule() {
+      const selectedVehicles = state.vehicles.filter(v => v.selected);
+      if (selectedVehicles.length === 0) return alert("Zaznacz przynajmniej jedno auto!");
+
+      const activeDrivers = state.drivers.filter(d => d.active);
+      if (activeDrivers.length === 0) return alert("Zaznacz przynajmniej jednego kierowcę!");
+
+      const isRoundTrip = document.getElementById("optRoundTrip").checked;
+      const useRandomSpread = document.getElementById("optRandomSpread").checked;
+      const mult = isRoundTrip ? 2 : 1;
+
+      // 1. Przetwórz wpisy z Dziennika jako sztywną bazę
+      let allCombinedTrips = [];
+      const usedRoutesByDate = {};
+
+      state.manualEntries.forEach((m, idx) => {
+        const vObj = state.vehicles.find(v => v.id == m.vehicleId);
+        if (!vObj) return;
+        if (!usedRoutesByDate[m.date]) usedRoutesByDate[m.date] = new Set();
+
+        allCombinedTrips.push({
+          date: m.date,
+          vehicleId: vObj.id,
+          vehicleName: vObj.name,
+          vehiclePlate: vObj.plate,
+          vehicleLabel: `${vObj.name} [${vObj.plate}]`,
+          driverName: m.driverName,
+          route: m.route,
+          baseKm: m.km,
+          km: m.km,
+          isManual: true
+        });
+      });
+
+      // 2. Dla każdego pojazdu oblicz ile km ma wpisane w Dzienniku, a ile jeszcze brakuje do docelowego targetu
+      const vehicleBuckets = {};
+      for (const v of selectedVehicles) {
+        const manualForVeh = allCombinedTrips.filter(t => t.vehicleId === v.id);
+        const manualKmSum = manualForVeh.reduce((s, t) => s + t.km, 0);
+        const remainingTarget = v.targetKm - manualKmSum;
+
+        const vActiveDates = getActiveDatesForVehicle(v);
+        vehicleBuckets[v.id] = {
+          vehicle: v,
+          activeDates: vActiveDates.map(d => formatIso(d)),
+          fixedTrips: [],
+          allTrips: []
+        };
+
+        if (remainingTarget > 0) {
+          // Pobierz sztywne trasy z Puli dla tego auta
+          const fixedRoutes = state.routes.filter(r => r.mode === 'fixed' && r.count > 0 && (r.assignTo === 'ALL' || String(r.assignTo) === String(v.id)));
+          fixedRoutes.forEach(r => {
+            for (let i = 0; i < r.count; i++) {
+              vehicleBuckets[v.id].fixedTrips.push(createTripInstance(r, mult, useRandomSpread));
+            }
+          });
+
+          // Dobierz pozostałe braki z Auto
+          const fixedSum = vehicleBuckets[v.id].fixedTrips.reduce((s, t) => s + t.km, 0);
+          const autoNeeded = remainingTarget - fixedSum;
+
+          let autoPool = state.routes.filter(r => r.mode === 'auto' && (r.assignTo === 'ALL' || String(r.assignTo) === String(v.id)));
+          if (autoPool.length === 0) autoPool = state.routes;
+
+          if (autoNeeded > 0) {
+            let bestExtra = [], bestErr = Infinity;
+            const maxTotalTrips = Math.max(vehicleBuckets[v.id].activeDates.length, vehicleBuckets[v.id].fixedTrips.length + 2);
+
+            for (let it = 0; it < 2500; it++) {
+              let extra = [], sum = 0;
+              while (vehicleBuckets[v.id].fixedTrips.length + extra.length < maxTotalTrips && sum < autoNeeded) {
+                const r = autoPool[Math.floor(Math.random() * autoPool.length)];
+                const t = createTripInstance(r, mult, useRandomSpread);
+                if (sum + t.km <= autoNeeded + 70) { extra.push(t); sum += t.km; }
+                else {
+                  const shorter = autoPool.filter(sr => (sr.km * mult) <= (autoNeeded - sum + 25));
+                  if (shorter.length > 0) {
+                    const sr = shorter[Math.floor(Math.random() * shorter.length)];
+                    extra.push(createTripInstance(sr, mult, useRandomSpread));
+                    sum += extra[extra.length - 1].km;
+                  }
+                  break;
+                }
+              }
+              const err = Math.abs(autoNeeded - sum);
+              if (err < bestErr) { bestErr = err; bestExtra = extra; if (err === 0) break; }
+            }
+            vehicleBuckets[v.id].allTrips = [...vehicleBuckets[v.id].fixedTrips, ...bestExtra];
+          } else {
+            vehicleBuckets[v.id].allTrips = [...vehicleBuckets[v.id].fixedTrips];
+          }
+
+          // Domknięcie co do 1 km
+          if (vehicleBuckets[v.id].allTrips.length > 0) {
+            let currSum = vehicleBuckets[v.id].allTrips.reduce((s, t) => s + t.km, 0);
+            let diff = autoNeeded - currSum, guard = 0;
+            while (diff !== 0 && guard < 3000) {
+              guard++; let changed = false;
+              for (let i = 0; i < vehicleBuckets[v.id].allTrips.length && diff !== 0; i++) {
+                const trp = vehicleBuckets[v.id].allTrips[i];
+                if (diff > 0 && trp.km < trp.maxKm) { trp.km += 1; diff -= 1; changed = true; }
+                else if (diff < 0 && trp.km > trp.baseKm) { trp.km -= 1; diff += 1; changed = true; }
+              }
+              if (!changed) break;
+            }
+            if (diff !== 0) vehicleBuckets[v.id].allTrips[vehicleBuckets[v.id].allTrips.length - 1].km += diff;
+          }
+        }
+      }
+
+      // 3. Rozłóż uzupełniane braki na wolne dni
+      for (const v of selectedVehicles) {
+        const bucket = vehicleBuckets[v.id];
+        const trips = bucket.allTrips;
+        if (trips.length === 0) continue;
+
+        const manualDatesForThisCar = new Set(allCombinedTrips.filter(t => t.vehicleId === v.id).map(t => t.date));
+        const availableDatesForAuto = bucket.activeDates.filter(d => !manualDatesForThisCar.has(d));
+
+        trips.sort(() => Math.random() - 0.5);
+        let candidateDates = [];
+        if (availableDatesForAuto.length > 0) {
+          if (trips.length <= availableDatesForAuto.length) {
+            const idxs = Array.from({ length: availableDatesForAuto.length }, (_, i) => i).sort(() => Math.random() - 0.5);
+            candidateDates = idxs.slice(0, trips.length).sort((a, b) => a - b).map(i => availableDatesForAuto[i]);
+          } else {
+            for (let i = 0; i < trips.length; i++) candidateDates.push(availableDatesForAuto[i % availableDatesForAuto.length]);
+            candidateDates.sort();
+          }
+        } else {
+          candidateDates = bucket.activeDates;
+        }
+
+        const unassignedTrips = [...trips];
+        for (let dIdx = 0; dIdx < candidateDates.length; dIdx++) {
+          const dStr = candidateDates[dIdx];
+          if (!usedRoutesByDate[dStr]) usedRoutesByDate[dStr] = new Set();
+          const conflictSet = usedRoutesByDate[dStr];
+          let pickIndex = unassignedTrips.findIndex(t => !conflictSet.has(t.routeId));
+          if (pickIndex === -1) pickIndex = 0;
+          const chosenTrip = unassignedTrips.splice(pickIndex, 1)[0];
+          chosenTrip.date = dStr;
+          conflictSet.add(chosenTrip.routeId);
+
+          allCombinedTrips.push({
+            date: dStr,
+            vehicleId: v.id,
+            vehicleName: v.name,
+            vehiclePlate: v.plate,
+            vehicleLabel: `${v.name} [${v.plate}]`,
+            routeId: chosenTrip.routeId,
+            route: chosenTrip.routeName + (isRoundTrip ? " (tam i z powr.)" : ""),
+            baseKm: chosenTrip.baseKm,
+            km: chosenTrip.km,
+            isManual: false
+          });
+        }
+      }
+
+      allCombinedTrips.sort((a, b) => a.date !== b.date ? a.date.localeCompare(b.date) : a.vehicleId - b.vehicleId);
+
+      // 4. Przypisanie kierowców z uwzględnieniem wpisów z Dziennika
+      let driverBag = [];
+      const usedDriversOnDate = {};
+      allCombinedTrips.forEach(row => {
+        if (!usedDriversOnDate[row.date]) usedDriversOnDate[row.date] = new Set();
+        if (row.isManual && row.driverName) {
+          usedDriversOnDate[row.date].add(row.driverName);
+        }
+      });
+
+      function pickDriverForDate(dateStr, presetName) {
+        if (presetName) return presetName;
+        if (!usedDriversOnDate[dateStr]) usedDriversOnDate[dateStr] = new Set();
+        const busyDrivers = usedDriversOnDate[dateStr];
+        if (driverBag.length === 0) driverBag = [...activeDrivers].sort(() => Math.random() - 0.5);
+        let idx = driverBag.findIndex(d => !busyDrivers.has(d.name));
+        if (idx !== -1) { const chosen = driverBag.splice(idx, 1)[0]; busyDrivers.add(chosen.name); return chosen.name; }
+        const availableToday = activeDrivers.filter(d => !busyDrivers.has(d.name));
+        if (availableToday.length > 0) { const chosen = availableToday[Math.floor(Math.random() * availableToday.length)]; busyDrivers.add(chosen.name); return chosen.name; }
+        return driverBag.pop().name;
+      }
+
+      allCombinedTrips.forEach(row => {
+        row.driverName = pickDriverForDate(row.date, row.isManual ? row.driverName : null);
+      });
+
+      state.generatedRows = allCombinedTrips;
+      state.resultsFilterVehicleId = "ALL";
+      recalculateOdometersAndRender();
+      switchTab('tab-generate');
+    }
+
+    function setResultsFilter(vehId) {
+      state.resultsFilterVehicleId = vehId;
+      recalculateOdometersAndRender();
+    }
+
+    function recalculateOdometersAndRender() {
+      const runningOdoMap = {};
+      state.vehicles.forEach(v => { runningOdoMap[v.id] = parseInt(v.startOdo, 10) || 0; });
+
+      state.generatedRows.forEach((row, idx) => {
+        row.globalId = idx + 1;
+        const prevOdo = runningOdoMap[row.vehicleId];
+        runningOdoMap[row.vehicleId] = prevOdo + row.km;
+        row.odoStart = prevOdo;
+        row.odoEnd = runningOdoMap[row.vehicleId];
+      });
+
+      const selectedVehicles = state.vehicles.filter(v => v.selected);
+      const tabsContainer = document.getElementById("resultsViewTabs");
+      tabsContainer.innerHTML = "";
+
+      const allBtn = document.createElement("button");
+      allBtn.type = "button";
+      allBtn.onclick = () => setResultsFilter("ALL");
+      allBtn.className = `px-3 py-1.5 rounded-lg text-xs font-bold border transition ${state.resultsFilterVehicleId === "ALL" ? 'bg-blue-600 text-white border-blue-500' : 'bg-slate-900 text-slate-300 border-slate-700'}`;
+      allBtn.textContent = `Wszystkie auta (${state.generatedRows.length})`;
+      tabsContainer.appendChild(allBtn);
+
+      selectedVehicles.forEach(v => {
+        const countForVeh = state.generatedRows.filter(r => r.vehicleId === v.id).length;
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.onclick = () => setResultsFilter(v.id);
+        btn.className = `px-3 py-1.5 rounded-lg text-xs font-bold border transition ${String(state.resultsFilterVehicleId) === String(v.id) ? 'bg-blue-600 text-white border-blue-500' : 'bg-slate-900 text-slate-300 border-slate-700'}`;
+        btn.textContent = `${v.name} (${countForVeh})`;
+        tabsContainer.appendChild(btn);
+      });
+
+      const visibleRows = state.resultsFilterVehicleId === "ALL" ? state.generatedRows : state.generatedRows.filter(r => String(r.vehicleId) === String(state.resultsFilterVehicleId));
+      const tbody = document.getElementById("resultsTableBody");
+      tbody.innerHTML = "";
+
+      let sumVisibleKm = 0;
+      visibleRows.forEach((row, visIdx) => {
+        sumVisibleKm += row.km;
+        const driverOptions = state.drivers.map(d => `<option value="${d.name}" ${d.name === row.driverName ? 'selected' : ''}>${d.name}</option>`).join('');
+        const badgeTag = row.isManual ? `<span class="text-[10px] bg-blue-500/20 text-blue-300 border border-blue-500/30 px-1.5 py-0.5 rounded ml-1">Z dziennika</span>` : '';
+
+        const tr = document.createElement("tr");
+        tr.className = "hover:bg-slate-700/30";
+        tr.innerHTML = `
+          <td class="py-2 px-2.5 font-mono text-slate-400">${visIdx + 1}</td>
+          <td class="py-2 px-2.5 font-mono font-semibold whitespace-nowrap text-white">${row.date}</td>
+          <td class="py-2 px-2.5 whitespace-nowrap text-blue-300 font-medium">${row.vehicleLabel}</td>
+          <td class="py-2 px-2.5"><select onchange="updateRowDriver(${row.globalId}, this.value)" class="py-1 px-2 text-xs bg-slate-900 border border-slate-700 rounded text-amber-300">${driverOptions}</select></td>
+          <td class="py-2 px-2.5 font-medium">${row.route} ${badgeTag}</td>
+          <td class="py-2 px-2.5 text-right font-mono text-slate-200">${row.odoStart} &rarr; ${row.odoEnd} km</td>
+          <td class="py-2 px-2.5 text-right font-mono font-bold text-emerald-400">${row.km} km</td>
+          <td class="py-2 px-2 text-center"><button type="button" onclick="removeResultRow(${row.globalId})" class="text-slate-400 hover:text-rose-400 px-1.5 font-bold">✕</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById("footTotalKm").textContent = `${sumVisibleKm} km`;
+      document.getElementById("footLabel").textContent = state.resultsFilterVehicleId === "ALL" ? "Suma przejechanych kilometrów (wszystkie auta):" : "Suma przejechanych kilometrów:";
+
+      const summaryParts = selectedVehicles.map(v => {
+        const vRows = state.generatedRows.filter(r => r.vehicleId === v.id);
+        const vSum = vRows.reduce((s, r) => s + r.km, 0);
+        return `${v.name}: ${vSum} km (${v.startOdo} → ${v.startOdo + vSum} km)`;
+      });
+      document.getElementById("resultsSummary").textContent = summaryParts.join("  |  ");
+      document.getElementById("resultsCard").classList.remove("hidden");
+      renderPrintSheets(selectedVehicles);
+    }
+
+    function renderPrintSheets(selectedVehicles) {
+      const printContainer = document.getElementById("printContainer");
+      printContainer.innerHTML = "";
+      const vehiclesToPrint = state.resultsFilterVehicleId === "ALL" ? selectedVehicles : selectedVehicles.filter(v => String(v.id) === String(state.resultsFilterVehicleId));
+
+      vehiclesToPrint.forEach(v => {
+        const vRows = state.generatedRows.filter(r => r.vehicleId === v.id);
+        const vSum = vRows.reduce((s, r) => s + r.km, 0);
+        const finalOdo = (parseInt(v.startOdo, 10) || 0) + vSum;
+        const rowsHtml = vRows.map((r, idx) => `<tr><td style="text-align: center;">${idx + 1}</td><td>${r.date}</td><td>${r.driverName}</td><td>${r.route}</td><td style="text-align: right; font-family: monospace;">${r.odoStart} &rarr; ${r.odoEnd} km</td><td style="text-align: right; font-weight: bold;">${r.km} km</td></tr>`).join('');
+
+        const sheet = document.createElement("div");
+        sheet.className = "print-page-break";
+        sheet.innerHTML = `
+          <h1 style="font-size: 14pt; font-weight: bold; text-transform: uppercase; margin: 0 0 6px 0;">Ewidencja Przebiegu Pojazdu</h1>
+          <div style="display: flex; justify-content: space-between; font-size: 9.5pt; border-bottom: 2px solid #000; padding-bottom: 6px; margin-bottom: 8px;">
+            <div><div><strong>Samochód:</strong> ${v.name}</div><div><strong>Nr rej:</strong> ${v.plate}</div></div>
+            <div style="text-align: right;"><div><strong>Okres:</strong> ${v.dateFrom} &mdash; ${v.dateTo}</div><div><strong>Stan licznika:</strong> ${v.startOdo} &rarr; ${finalOdo} km (<strong>${vSum} km</strong>)</div></div>
+          </div>
+          <table><thead><tr><th style="width: 40px;">Lp.</th><th style="width: 95px;">Data</th><th style="width: 160px;">Kierowca</th><th>Trasa</th><th style="width: 140px; text-align: right;">Liczniki</th><th style="width: 90px; text-align: right;">Dystans</th></tr></thead><tbody>${rowsHtml}</tbody><tfoot><tr><td colspan="5" style="text-align: right; font-weight: bold;">RAZEM:</td><td style="text-align: right; font-weight: bold;">${vSum} km</td></tr></tfoot></table>
+          <div style="margin-top: 30px; display: flex; justify-content: space-between; font-size: 9pt;">
+            <div style="width: 240px; text-align: center;"><div style="border-bottom: 1px dotted #000; height: 24px;"></div><div>Podpis kierowcy</div></div>
+            <div style="width: 240px; text-align: center;"><div style="border-bottom: 1px dotted #000; height: 24px;"></div><div>Zatwierdził</div></div>
+          </div>
+        `;
+        printContainer.appendChild(sheet);
+      });
+    }
+
+    function updateRowDriver(globalId, newDriverName) {
+      const r = state.generatedRows.find(x => x.globalId === globalId);
+      if (r) { r.driverName = newDriverName; renderPrintSheets(state.vehicles.filter(v => v.selected)); }
+    }
+
+    function removeResultRow(globalId) {
+      state.generatedRows = state.generatedRows.filter(x => x.globalId !== globalId);
+      recalculateOdometersAndRender();
+    }
+
+    function exportCSV() {
+      if (state.generatedRows.length === 0) return;
+      const rowsToExport = state.resultsFilterVehicleId === "ALL" ? state.generatedRows : state.generatedRows.filter(r => String(r.vehicleId) === String(state.resultsFilterVehicleId));
+      const headers = ["Lp.", "Data", "Pojazd", "Kierowca", "Trasa", "Licznik Od", "Licznik Do", "Dystans (km)"];
+      const rows = rowsToExport.map((r, idx) => [idx + 1, r.date, `"${r.vehicleLabel}"`, `"${r.driverName}"`, `"${r.route}"`, r.odoStart, r.odoEnd, r.km]);
+      const { minFrom, maxTo } = getGlobalCalendarSpan();
+      const csv = "\uFEFF" + [headers.join(";"), ...rows.map(e => e.join(";"))].join("\r\n");
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = `Kilometrowka_${minFrom}_${maxTo}.csv`;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    }
+
+    function exportJSON() {
+      const data = { vehicles: state.vehicles, drivers: state.drivers, routes: state.routes, manualEntries: state.manualEntries };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = "baza_kilometrowka_v8.json";
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    }
+
+    function importJSON(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(ev) {
+        try {
+          const data = JSON.parse(ev.target.result);
+          if (Array.isArray(data.vehicles)) state.vehicles = data.vehicles;
+          if (Array.isArray(data.drivers)) state.drivers = data.drivers;
+          if (Array.isArray(data.routes)) state.routes = data.routes;
+          if (Array.isArray(data.manualEntries)) state.manualEntries = data.manualEntries;
+          saveState();
+          renderManualJournal();
+          renderVehicles();
+          renderQuotasTable();
+          renderDrivers();
+          renderRoutes();
+          renderCalendarGrid();
+          alert("Pomyślnie wgrano bazę!");
+        } catch (err) { alert("Błąd odczytu pliku."); }
+      };
+      reader.readAsText(file);
+    }
+  </script>
+</body>
+</html>
