@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>AutoKilometrówka Pro v11.1 - Instant Fix</title>
+  <title>AutoKilometrówka Pro v12.0</title>
   
   <meta name="theme-color" content="#0f172a">
   <meta name="mobile-web-app-capable" content="yes">
@@ -76,20 +76,20 @@
         <div>
           <div class="flex items-center gap-2">
             <h1 class="text-base sm:text-lg font-bold tracking-tight text-white">AutoKilometrówka Pro</h1>
-            <span class="text-[11px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full font-mono">v11.1 Fix</span>
+            <span class="text-[11px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full font-mono">v12.0</span>
           </div>
           <div class="flex items-center gap-2 text-xs">
             <span id="cloudStatusBadge" class="inline-flex items-center gap-1 text-[11px] text-emerald-400">
               <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Autozapis aktywny
             </span>
-            <button onclick="toggleCloudConfigModal()" class="text-blue-400 hover:underline text-[11px]">(Ustawienia chmury)</button>
+            <button onclick="toggleCloudConfigModal()" class="text-blue-400 hover:underline text-[11px]">(Chmura)</button>
           </div>
         </div>
       </div>
       
       <div class="flex items-center gap-1.5">
         <button type="button" onclick="manualCloudSync()" class="bg-blue-600/30 hover:bg-blue-600/50 text-blue-200 border border-blue-500/40 text-xs px-2.5 py-2 rounded-lg transition">
-          Synchronizuj teraz
+          Synchronizuj
         </button>
         <button type="button" onclick="exportJSON()" class="bg-slate-700 hover:bg-slate-600 text-xs text-slate-200 px-2.5 py-2 rounded-lg border border-slate-600 transition">
           Kopia JSON
@@ -110,7 +110,7 @@
         <button onclick="toggleCloudConfigModal()" class="text-slate-400 hover:text-white font-bold">✕</button>
       </div>
       <p class="text-xs text-slate-300">
-        Podepnij darmowy klucz i ID z <strong>JSONBin.io</strong>, by mieć wspólną bazę na telefonie i komputerze:
+        Wpisz dane konta z <strong>JSONBin.io</strong>, by baza nie zniknęła przy czyszczeniu telefonu:
       </p>
       <div>
         <label class="block text-[11px] text-slate-400 mb-1">Master Key</label>
@@ -122,7 +122,7 @@
       </div>
       <div class="flex justify-end gap-2 pt-2">
         <button onclick="toggleCloudConfigModal()" class="bg-slate-700 hover:bg-slate-600 text-xs px-3 py-2 rounded-lg">Anuluj</button>
-        <button onclick="saveCloudConfig()" class="bg-blue-600 hover:bg-blue-500 text-xs font-bold text-white px-4 py-2 rounded-lg">Zapisz i połącz</button>
+        <button onclick="saveCloudConfig()" class="bg-blue-600 hover:bg-blue-500 text-xs font-bold text-white px-4 py-2 rounded-lg">Zapisz</button>
       </div>
     </div>
   </div>
@@ -165,7 +165,7 @@
               Dziennik Rzeczywistych Wyjazdów
             </h2>
             <p class="text-xs text-slate-300 mt-0.5">
-              Wpisz zrealizowane trasy. Po kliknięciu „Dodaj” wpis natychmiast pojawia się w tabeli poniżej.
+              Wpisz znane wyjazdy. Jeśli zostawisz kilometry puste, automat sam dobierze trasę w ten dzień i dopisze kilometry!
             </p>
           </div>
           <button type="button" onclick="switchTab('tab-generate')" class="text-xs bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold px-4 py-2 rounded-xl shadow transition">
@@ -193,31 +193,31 @@
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-slate-800/80 p-3 rounded-lg border border-slate-700">
             <div>
               <label class="block text-[11px] text-blue-300 font-semibold mb-1">Stan licznika OD (km)</label>
-              <input type="number" id="manualOdoStart" placeholder="np. 142100" class="w-full text-xs font-mono" oninput="onManualOdoInput()">
+              <input type="number" id="manualOdoStart" placeholder="Opcjonalnie np. 142100" class="w-full text-xs font-mono" oninput="onManualOdoInput()">
             </div>
             <div>
               <label class="block text-[11px] text-blue-300 font-semibold mb-1">Stan licznika DO (km)</label>
-              <input type="number" id="manualOdoEnd" placeholder="np. 142460" class="w-full text-xs font-mono" oninput="onManualOdoInput()">
+              <input type="number" id="manualOdoEnd" placeholder="Opcjonalnie np. 142460" class="w-full text-xs font-mono" oninput="onManualOdoInput()">
             </div>
             <div>
-              <label class="block text-[11px] text-emerald-400 font-semibold mb-1">Przejechany dystans (km)</label>
-              <input type="number" id="manualDistCustom" placeholder="Liczony automatycznie" class="w-full text-xs font-mono font-bold text-emerald-400">
+              <label class="block text-[11px] text-emerald-400 font-semibold mb-1">Dystans (km) - zostaw puste, by automat dobrał</label>
+              <input type="number" id="manualDistCustom" placeholder="Puste = automat dopisze km" class="w-full text-xs font-mono font-bold text-emerald-400">
             </div>
           </div>
 
           <div class="bg-slate-800/90 border border-slate-700 rounded-xl p-3">
             <div class="flex items-center justify-between mb-2">
-              <span class="text-xs font-bold text-amber-300 uppercase">Drzewko lokalizacji (zaznacz cel):</span>
+              <span class="text-xs font-bold text-amber-300 uppercase">Drzewko lokalizacji (opcjonalny wybór celów):</span>
               <span id="treeSelectedKmSum" class="text-xs font-mono text-emerald-400 font-bold">Zaznaczono km: 0</span>
             </div>
             <div id="locationTreeContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 max-h-52 overflow-y-auto p-2 bg-slate-900/80 rounded-lg border border-slate-700"></div>
           </div>
 
           <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
-            <span class="text-xs text-slate-400">Wybierz trasy z drzewka lub podaj stan licznika.</span>
+            <span class="text-xs text-slate-400">Możesz podać licznik, zaznaczyć cele z drzewka lub zostawić km puste – wtedy system dopisze trasę sam.</span>
             <div class="flex gap-2">
               <input type="hidden" id="editingManualId" value="">
-              <button type="button" id="cancelEditBtn" onclick="cancelManualEdit()" class="hidden bg-slate-700 hover:bg-slate-600 text-xs px-3 py-2 rounded-lg">Anuluj edycję</button>
+              <button type="button" id="cancelEditBtn" onclick="cancelManualEdit()" class="hidden bg-slate-700 hover:bg-slate-600 text-xs px-3 py-2 rounded-lg">Anuluj</button>
               <button type="button" onclick="saveManualEntry()" id="saveManualBtn" class="bg-blue-600 hover:bg-blue-500 active:scale-95 text-white font-semibold text-xs px-5 py-2.5 rounded-lg transition shadow-md">
                 + Dodaj wyjazd do dziennika
               </button>
@@ -254,7 +254,7 @@
               Krok 2: Parametry główne generatora
             </h2>
             <p class="text-xs text-slate-400">
-              Generator dopełnia luki między Twoimi wpisami w dniach roboczych (weekendy wyłączone).
+              Generator uzupełnia luki w dniach roboczych (soboty i niedziele są pomijane).
             </p>
           </div>
           <div class="flex flex-wrap gap-2">
@@ -530,10 +530,10 @@
     let cloudConfig = safeStorage.get("ak_cloud_cfg", { key: "", bin: "" });
 
     let state = {
-      vehicles: safeStorage.get("ak_vehicles_v111", JSON.parse(JSON.stringify(DEFAULT_VEHICLES))),
-      drivers: safeStorage.get("ak_drivers_v111", JSON.parse(JSON.stringify(DEFAULT_DRIVERS))),
-      routes: safeStorage.get("ak_routes_v111", JSON.parse(JSON.stringify(DEFAULT_ROUTES))),
-      manualEntries: safeStorage.get("ak_manual_v111", []),
+      vehicles: safeStorage.get("ak_vehicles_v12", JSON.parse(JSON.stringify(DEFAULT_VEHICLES))),
+      drivers: safeStorage.get("ak_drivers_v12", JSON.parse(JSON.stringify(DEFAULT_DRIVERS))),
+      routes: safeStorage.get("ak_routes_v12", JSON.parse(JSON.stringify(DEFAULT_ROUTES))),
+      manualEntries: safeStorage.get("ak_manual_v12", []),
       activeDaysOfWeek: [1, 2, 3, 4, 5],
       excludedDates: new Set(),
       generatedRows: [],
@@ -541,10 +541,10 @@
     };
 
     function saveState() {
-      safeStorage.set("ak_vehicles_v111", state.vehicles);
-      safeStorage.set("ak_drivers_v111", state.drivers);
-      safeStorage.set("ak_routes_v111", state.routes);
-      safeStorage.set("ak_manual_v111", state.manualEntries);
+      safeStorage.set("ak_vehicles_v12", state.vehicles);
+      safeStorage.set("ak_drivers_v12", state.drivers);
+      safeStorage.set("ak_routes_v12", state.routes);
+      safeStorage.set("ak_manual_v12", state.manualEntries);
       updateBadges();
       triggerCloudAutosave();
     }
@@ -673,7 +673,7 @@
     }
 
     // =========================================================================
-    // DZIENNIK: ODDZIELONA TABELA OD DRZEWKA (BEZ ZAWIESZANIA DOM)
+    // DZIENNIK: BŁYSKAWICZNE DODAWANIE BEZ ODŚWIEŻANIA
     // =========================================================================
     function buildLocationTree() {
       const treeContainer = document.getElementById("locationTreeContainer");
@@ -695,7 +695,6 @@
     }
 
     function renderManualTableOnly() {
-      // Wypełnij selecty aut i kierowców
       const vehSelect = document.getElementById("manualVehicle");
       const drvSelect = document.getElementById("manualDriver");
       if (vehSelect) {
@@ -737,15 +736,17 @@
         const vObj = state.vehicles.find(v => v.id == entry.vehicleId);
         const vLabel = vObj ? `${vObj.name} [${vObj.plate}]` : "Auto";
         const odoText = (entry.odoStart && entry.odoEnd) ? `${entry.odoStart} &rarr; ${entry.odoEnd} km` : (entry.odoEnd ? `do ${entry.odoEnd} km` : '-');
+        const kmDisplay = entry.km ? `${entry.km} km` : '<span class="text-amber-400 font-normal">Automat dopisze</span>';
+        
         const tr = document.createElement("tr");
         tr.className = "hover:bg-slate-700/30";
         tr.innerHTML = `
           <td class="py-2.5 px-3 font-mono font-semibold text-white">${entry.date}</td>
           <td class="py-2.5 px-3 text-blue-300">${vLabel}</td>
           <td class="py-2.5 px-3 text-amber-300">${entry.driverName}</td>
-          <td class="py-2.5 px-3 font-medium">${entry.route || 'Trasa manualna'}</td>
+          <td class="py-2.5 px-3 font-medium">${entry.route || 'Cel losowany'}</td>
           <td class="py-2.5 px-3 text-right font-mono text-slate-300">${odoText}</td>
-          <td class="py-2.5 px-3 text-right font-mono font-bold text-emerald-400">${entry.km} km</td>
+          <td class="py-2.5 px-3 text-right font-mono font-bold text-emerald-400">${kmDisplay}</td>
           <td class="py-2.5 px-3 text-right whitespace-nowrap">
             <button type="button" onclick="editManualEntry(${entry.id})" class="text-blue-400 hover:text-blue-300 mr-2">Edytuj</button>
             <button type="button" onclick="removeManualEntry(${entry.id})" class="text-rose-400 hover:text-rose-300 font-bold px-1">✕</button>
@@ -775,7 +776,7 @@
       });
       document.getElementById("treeSelectedKmSum").textContent = `Zaznaczono km: ${totalKm}`;
       const customDistInput = document.getElementById("manualDistCustom");
-      if (!customDistInput.value || customDistInput.dataset.fromTree === "true" || customDistInput.value === "0") {
+      if (customDistInput && (!customDistInput.value || customDistInput.dataset.fromTree === "true" || customDistInput.value === "0")) {
         customDistInput.value = totalKm > 0 ? totalKm : "";
         customDistInput.dataset.fromTree = "true";
       }
@@ -788,7 +789,7 @@
       const editId = document.getElementById("editingManualId").value;
       const odoStartVal = parseInt(document.getElementById("manualOdoStart").value, 10) || null;
       const odoEndVal = parseInt(document.getElementById("manualOdoEnd").value, 10) || null;
-      let distVal = parseInt(document.getElementById("manualDistCustom").value, 10) || 0;
+      let distVal = parseInt(document.getElementById("manualDistCustom").value, 10) || null;
 
       const treeContainer = document.getElementById("locationTreeContainer");
       const checkedBoxes = treeContainer ? treeContainer.querySelectorAll('input[type="checkbox"]:checked') : [];
@@ -806,11 +807,12 @@
         }
       });
 
-      if (distVal <= 0 && treeKm > 0) distVal = treeKm;
-      if (distVal <= 0 && odoStartVal && odoEndVal && odoEndVal >= odoStartVal) distVal = odoEndVal - odoStartVal;
-      if (distVal <= 0) return alert("Zaznacz lokalizacje w drzewku lub wpisz dystans!");
+      // Jeśli nie wpisano km z palca, a zaznaczono drzewko -> weź km z drzewka
+      if (!distVal && treeKm > 0) distVal = treeKm;
+      // Jeśli nie wpisano km, ale podano liczniki Od-Do -> weź różnicę
+      if (!distVal && odoStartVal && odoEndVal && odoEndVal >= odoStartVal) distVal = odoEndVal - odoStartVal;
 
-      const routeStr = routeNames.length > 0 ? routeNames.join(" + ") : "Trasa użytkownika";
+      const routeStr = routeNames.length > 0 ? routeNames.join(" + ") : (distVal ? "Trasa wg licznika" : "Wyjazd (dopisz automat)");
 
       if (editId) {
         const entry = state.manualEntries.find(e => e.id == editId);
@@ -819,7 +821,7 @@
           entry.vehicleId = vehicleId;
           entry.driverName = driverName;
           entry.route = routeStr;
-          entry.km = distVal;
+          entry.km = distVal; // może być null
           entry.odoStart = odoStartVal;
           entry.odoEnd = odoEndVal;
         }
@@ -831,7 +833,7 @@
           vehicleId,
           driverName,
           route: routeStr,
-          km: distVal,
+          km: distVal, // może być null
           odoStart: odoStartVal,
           odoEnd: odoEndVal
         });
@@ -859,7 +861,7 @@
       document.getElementById("editingManualId").value = entry.id;
       document.getElementById("manualOdoStart").value = entry.odoStart || "";
       document.getElementById("manualOdoEnd").value = entry.odoEnd || "";
-      document.getElementById("manualDistCustom").value = entry.km;
+      document.getElementById("manualDistCustom").value = entry.km || "";
 
       const treeContainer = document.getElementById("locationTreeContainer");
       if (treeContainer) {
@@ -1267,7 +1269,7 @@
     }
 
     // =========================================================================
-    // HYBRYDOWY GENERATOR Z DOPASOWYWANIEM LUK DO LICZNIKÓW
+    // HYBRYDOWY GENERATOR Z AUTOMATYCZNYM DOPEŁNIANIEM BRAKÓW W WPISACH
     // =========================================================================
     function generateMultiSchedule() {
       const selectedVehicles = state.vehicles.filter(v => v.selected);
@@ -1287,18 +1289,30 @@
         const vActiveDates = getActiveDatesForVehicle(v).map(d => formatIso(d));
         if (vActiveDates.length === 0) return alert(`Samochód ${v.name} nie ma aktywnych dni roboczych.`);
 
+        // Pobierz i posortuj wpisy z dziennika dla tego auta
         const carManualEntries = state.manualEntries
           .filter(m => m.vehicleId == v.id && vActiveDates.includes(m.date))
           .sort((a, b) => a.date.localeCompare(b.date));
 
+        let autoPool = state.routes.filter(r => r.mode === 'auto' && (r.assignTo === 'ALL' || String(r.assignTo) === String(v.id)));
+        if (autoPool.length === 0) autoPool = state.routes;
+
+        // Jeśli któryś z wpisów manualnych ma puste kilometry (km == null lub 0) -> automat sam dobiera tam trasę!
+        carManualEntries.forEach(m => {
+          if (!m.km || m.km <= 0) {
+            const picked = autoPool[Math.floor(Math.random() * autoPool.length)];
+            const t = createTripInstance(picked, mult, useRandomSpread);
+            m.km = t.km;
+            m.route = picked.name + (isRoundTrip ? " (tam i z powr.)" : "");
+            m.wasAutoFilled = true;
+          }
+        });
+
         const manualDatesSet = new Set(carManualEntries.map(m => m.date));
         const gapDates = vActiveDates.filter(d => !manualDatesSet.has(d));
 
-        const totalManualKm = carManualEntries.reduce((s, m) => s + m.km, 0);
+        const totalManualKm = carManualEntries.reduce((s, m) => s + (m.km || 0), 0);
         let neededGapKm = v.targetKm - totalManualKm;
-
-        let autoPool = state.routes.filter(r => r.mode === 'auto' && (r.assignTo === 'ALL' || String(r.assignTo) === String(v.id)));
-        if (autoPool.length === 0) autoPool = state.routes;
 
         let gapTrips = [];
         const fixedRoutes = state.routes.filter(r => r.mode === 'fixed' && r.count > 0 && (r.assignTo === 'ALL' || String(r.assignTo) === String(v.id)));
@@ -1334,6 +1348,7 @@
           gapTrips = [...gapTrips, ...bestExtra];
         }
 
+        // Domknięcie braków co do 1 km
         if (gapTrips.length > 0) {
           let currGapSum = gapTrips.reduce((s, t) => s + t.km, 0);
           let diff = neededGapKm - currGapSum, guard = 0;
@@ -1569,7 +1584,7 @@
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
-      a.href = url; a.download = "baza_kilometrowka_v11.json";
+      a.href = url; a.download = "baza_kilometrowka_v12.json";
       document.body.appendChild(a); a.click(); document.body.removeChild(a);
     }
 
