@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>AutoKilometrówka Pro v9.0 - Drzewko i Wypełnianie Luk</title>
+  <title>AutoKilometrówka Pro v10.0</title>
   
   <meta name="theme-color" content="#0f172a">
   <meta name="mobile-web-app-capable" content="yes">
@@ -79,9 +79,9 @@
         <div>
           <div class="flex items-center gap-2">
             <h1 class="text-base sm:text-lg font-bold tracking-tight text-white">AutoKilometrówka Pro</h1>
-            <span class="text-[11px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full font-mono">v9.0 Drzewko & Luka</span>
+            <span class="text-[11px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full font-mono">v10.0</span>
           </div>
-          <p class="text-xs text-slate-400">Drzewko lokalizacji, wielokrotny wybór i wypełnianie luk</p>
+          <p class="text-xs text-slate-400">Ręczny dziennik z licznikami + elastyczny generator luk</p>
         </div>
       </div>
       
@@ -104,7 +104,7 @@
   <div class="max-w-7xl mx-auto px-4 pt-3 w-full no-print">
     <nav class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-1.5 bg-slate-800/90 p-1.5 rounded-xl border border-slate-700">
       <button type="button" onclick="switchTab('tab-journal')" id="btn-tab-journal" class="tab-btn py-2 px-2.5 rounded-lg text-xs font-semibold transition bg-blue-600 text-white shadow">
-        1. Dziennik (Drzewko)
+        1. Dziennik Rzeczywisty
       </button>
       <button type="button" onclick="switchTab('tab-generate')" id="btn-tab-generate" class="tab-btn py-2 px-2.5 rounded-lg text-xs font-semibold transition text-slate-300 hover:text-white">
         2. Generator / Liczniki
@@ -127,19 +127,18 @@
     </nav>
   </div>
 
-  <!-- GŁÓWNA ZAWARTOŚĆ -->
   <main class="max-w-7xl mx-auto px-4 py-4 w-full flex-1">
     
-    <!-- ==================== ZAKŁADKA 1: DZIENNIK Z DRZEWKIEM LOKALIZACJI ==================== -->
+    <!-- ==================== ZAKŁADKA 1: DZIENNIK RZECZYWISTY ==================== -->
     <div id="tab-journal" class="tab-content space-y-5">
       <div class="bg-slate-800 rounded-2xl border border-slate-700 p-4 sm:p-5 shadow-xl">
         <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
           <div>
             <h2 class="text-sm font-bold text-blue-400 uppercase tracking-wider">
-              Dziennik Rzeczywistych Wyjazdów (Drzewko Lokalizacji)
+              Dziennik Rzeczywistych Wyjazdów
             </h2>
             <p class="text-xs text-slate-300 mt-0.5">
-              Zaznacz w drzewku jedną lub wiele lokalizacji naraz. Kilometry zsumują się automatycznie. Luki w dniach wypełni automat!
+              Wpisz znane Ci trasy i stany liczników. Twój wpis nie musi być pierwszy w miesiącu – generator wypełni luki przed nim i po nim!
             </p>
           </div>
           <button type="button" onclick="switchTab('tab-generate')" class="text-xs bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold px-4 py-2 rounded-xl shadow transition">
@@ -147,11 +146,11 @@
           </button>
         </div>
 
-        <!-- Formularz wyjazdu z drzewkiem -->
-        <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-700/80 mb-5 space-y-3">
+        <!-- Formularz dodawania do dziennika -->
+        <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-700/80 mb-5 space-y-3.5">
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
-              <label class="block text-[11px] text-slate-400 mb-1">Data</label>
+              <label class="block text-[11px] text-slate-400 mb-1">Data wyjazdu</label>
               <input type="date" id="manualDate" class="w-full text-xs">
             </div>
             <div>
@@ -164,26 +163,38 @@
             </div>
           </div>
 
-          <!-- Drzewko lokalizacji z wielokrotnym zaznaczaniem -->
-          <div class="bg-slate-800/90 border border-slate-700 rounded-xl p-3">
-            <div class="flex items-center justify-between mb-2">
-              <span class="text-xs font-bold text-amber-300 uppercase">Drzewko lokalizacji (zaznacz cele wyjazdu):</span>
-              <span id="treeSelectedKmSum" class="text-xs font-mono text-emerald-400 font-bold">Wybrano km: 0</span>
+          <!-- Stany licznika dla wpisu manualnego -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-slate-800/80 p-3 rounded-lg border border-slate-700">
+            <div>
+              <label class="block text-[11px] text-blue-300 font-semibold mb-1">Stan licznika OD (km)</label>
+              <input type="number" id="manualOdoStart" placeholder="Opcjonalnie np. 142100" class="w-full text-xs font-mono" oninput="onManualOdoInput()">
             </div>
-            <div id="locationTreeContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 max-h-52 overflow-y-auto p-2 bg-slate-900/80 rounded-lg border border-slate-700">
-              <!-- Generowane przez JS -->
+            <div>
+              <label class="block text-[11px] text-blue-300 font-semibold mb-1">Stan licznika DO (km)</label>
+              <input type="number" id="manualOdoEnd" placeholder="Opcjonalnie np. 142460" class="w-full text-xs font-mono" oninput="onManualOdoInput()">
+            </div>
+            <div>
+              <label class="block text-[11px] text-emerald-400 font-semibold mb-1">Przejechany dystans (km)</label>
+              <input type="number" id="manualDistCustom" placeholder="Liczony z tras lub z licznika" class="w-full text-xs font-mono font-bold text-emerald-400">
             </div>
           </div>
 
-          <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
-            <div class="text-xs text-slate-300">
-              Suma zaznaczonych tras: <strong id="calculatedManualKm" class="text-emerald-400 font-mono text-sm">0 km</strong> (Liczone ×2 z bazy)
+          <!-- Drzewko lokalizacji -->
+          <div class="bg-slate-800/90 border border-slate-700 rounded-xl p-3">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-bold text-amber-300 uppercase">Drzewko lokalizacji (zaznacz cel):</span>
+              <span id="treeSelectedKmSum" class="text-xs font-mono text-emerald-400 font-bold">Zaznaczono km: 0</span>
             </div>
+            <div id="locationTreeContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 max-h-52 overflow-y-auto p-2 bg-slate-900/80 rounded-lg border border-slate-700"></div>
+          </div>
+
+          <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
+            <span class="text-xs text-slate-400">Wpisz liczniki lub zaznacz cele z drzewka (możesz też łączyć jedno i drugie).</span>
             <div class="flex gap-2">
               <input type="hidden" id="editingManualId" value="">
-              <button type="button" id="cancelEditBtn" onclick="cancelManualEdit()" class="hidden bg-slate-700 hover:bg-slate-600 text-xs px-3 py-2 rounded-lg">Anuluj</button>
+              <button type="button" id="cancelEditBtn" onclick="cancelManualEdit()" class="hidden bg-slate-700 hover:bg-slate-600 text-xs px-3 py-2 rounded-lg">Anuluj edycję</button>
               <button type="button" onclick="saveManualEntry()" id="saveManualBtn" class="bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs px-5 py-2.5 rounded-lg transition">
-                + Zapisz wpis w dzienniku
+                + Dodaj wyjazd do dziennika
               </button>
             </div>
           </div>
@@ -198,8 +209,9 @@
                 <th class="py-2.5 px-3">Pojazd</th>
                 <th class="py-2.5 px-3">Kierowca</th>
                 <th class="py-2.5 px-3">Zaznaczone lokalizacje (Cel)</th>
+                <th class="py-2.5 px-3 text-right">Licznik: Od &rarr; Do</th>
                 <th class="py-2.5 px-3 text-right">Dystans (km)</th>
-                <th class="py-2.5 px-3 text-right">Edycja / Usuń</th>
+                <th class="py-2.5 px-3 text-right">Akcja</th>
               </tr>
             </thead>
             <tbody id="manualTableBody" class="divide-y divide-slate-700/60 text-slate-200"></tbody>
@@ -215,10 +227,10 @@
         <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
           <div>
             <h2 class="text-xs font-bold text-blue-400 uppercase tracking-wider">
-              Krok 2: Okresy, liczniki początkowe i końcowe dla aut
+              Krok 2: Parametry główne generatora
             </h2>
             <p class="text-xs text-slate-400">
-              Aplikacja wypełni automatycznie luki w dniach pomiędzy Twoimi wpisami i domknie stany liczników!
+              Wybierz od kiedy do kiedy generator ma rozliczyć samochód oraz jaki jest stan licznika na początku i na końcu całego okresu.
             </p>
           </div>
           <div class="flex flex-wrap gap-2">
@@ -231,9 +243,10 @@
           </div>
         </div>
 
+        <!-- Pasek globalnych dat -->
         <div class="bg-slate-900/90 p-3 rounded-xl border border-slate-700/80 mb-4 flex flex-wrap items-end justify-between gap-3">
           <div class="flex flex-wrap items-center gap-3">
-            <span class="text-xs font-semibold text-slate-300">Szybkie ustawienie dat dla wszystkich aut:</span>
+            <span class="text-xs font-semibold text-slate-300">Ustawienie dat od-do dla wszystkich aut:</span>
             <div class="flex items-center gap-1.5">
               <span class="text-[11px] text-slate-400">Od:</span>
               <input type="date" id="globalDateFrom" class="py-1 px-2 text-xs">
@@ -243,7 +256,7 @@
               <input type="date" id="globalDateTo" class="py-1 px-2 text-xs">
             </div>
             <button type="button" onclick="applyGlobalDatesToAllVehicles()" class="bg-blue-600/30 hover:bg-blue-600/50 text-blue-200 border border-blue-500/40 text-xs font-semibold px-3 py-1.5 rounded-lg transition">
-              Zastosuj do wszystkich
+              Zastosuj
             </button>
           </div>
         </div>
@@ -255,14 +268,14 @@
             <input type="checkbox" id="optRoundTrip" checked onchange="renderQuotasTable()" class="mt-1 w-4 h-4 rounded text-blue-600">
             <div>
               <div class="text-xs font-bold text-slate-200">Licz trasy bazowe tam i z powrotem (×2)</div>
-              <div class="text-[11px] text-slate-400">Dotyczy wpisów z drzewka oraz luk</div>
+              <div class="text-[11px] text-slate-400">Dotyczy dobieranych automatycznie tras</div>
             </div>
           </label>
           <label class="flex items-start gap-3 p-3 rounded-xl bg-slate-900/60 border border-slate-700/80 cursor-pointer hover:bg-slate-900">
             <input type="checkbox" id="optRandomSpread" checked class="mt-1 w-4 h-4 rounded text-blue-600">
             <div>
               <div class="text-xs font-bold text-slate-200">Losowy narzut do 10% przy wypełnianiu luk</div>
-              <div class="text-[11px] text-slate-400">Automatycznie dopełniane trasy zyskają realny rozrzut</div>
+              <div class="text-[11px] text-slate-400">Dopełniane trasy zyskają realny rozrzut</div>
             </div>
           </label>
         </div>
@@ -287,7 +300,7 @@
               Pobierz CSV (Excel)
             </button>
             <button type="button" onclick="window.print()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-3.5 py-2 rounded-lg shadow transition">
-              Drukuj karty pojazdów (PDF / A4)
+              Drukuj karty (PDF / A4)
             </button>
           </div>
         </div>
@@ -326,7 +339,7 @@
       <div id="printContainer" class="print-only"></div>
     </div>
 
-    <!-- ==================== ZAKŁADKA 3: PULA I LIMITY ==================== -->
+    <!-- ZAKŁADKA 3: PULA I LIMITY -->
     <div id="tab-quotas" class="tab-content hidden space-y-5 no-print">
       <div class="bg-slate-800 rounded-2xl border border-slate-700 p-4 sm:p-5 shadow-xl">
         <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
@@ -334,21 +347,17 @@
             <h2 class="text-sm font-bold text-amber-400 uppercase tracking-wider">
               Pula Lokalizacji do Wypełniania Luk
             </h2>
-            <p class="text-xs text-slate-300 mt-0.5">Określ krotność lokalizacji, z których aplikacja ma korzystać uzupełniając luki między Twoimi wpisami.</p>
+            <p class="text-xs text-slate-300 mt-0.5">Wybierz krotności tras, z których generator ma losować przy dopełnianiu kilometrów.</p>
           </div>
           <div class="flex flex-wrap gap-2">
-            <button type="button" onclick="setAllQuotas('auto')" class="text-xs bg-blue-600/30 hover:bg-blue-600/50 text-blue-200 border border-blue-500/40 px-3 py-1.5 rounded-lg">
-              Ustaw wszystkie na: Auto
-            </button>
-            <button type="button" onclick="setAllQuotas('zero')" class="text-xs bg-slate-700 hover:bg-slate-600 text-slate-300 px-3 py-1.5 rounded-lg">
-              Wyzeruj wszystkie (0)
-            </button>
+            <button type="button" onclick="setAllQuotas('auto')" class="text-xs bg-blue-600/30 hover:bg-blue-600/50 text-blue-200 border border-blue-500/40 px-3 py-1.5 rounded-lg">Ustaw na Auto</button>
+            <button type="button" onclick="setAllQuotas('zero')" class="text-xs bg-slate-700 hover:bg-slate-600 text-slate-300 px-3 py-1.5 rounded-lg">Wyzeruj (0)</button>
           </div>
         </div>
 
         <div id="quotaSummaryBanner" class="bg-slate-900/90 border border-slate-700 rounded-xl p-3 mb-4 text-xs flex flex-wrap items-center justify-between gap-2">
           <span id="quotaStatsText" class="text-slate-300">Ładowanie statystyk...</span>
-          <span class="text-slate-400">Luki w miesiącu aplikacja wypełni z tras <strong class="text-blue-400">Auto</strong>.</span>
+          <span class="text-slate-400">Luki zostaną uzupełnione trasami <strong class="text-blue-400">Auto</strong>.</span>
         </div>
 
         <div class="overflow-x-auto">
@@ -358,8 +367,8 @@
                 <th class="py-2.5 px-3">Lokalizacja</th>
                 <th class="py-2.5 px-3 text-right">Dystans bazowy</th>
                 <th class="py-2.5 px-3">Tryb / Krotność</th>
-                <th class="py-2.5 px-3">Dokładna ilość</th>
-                <th class="py-2.5 px-3">Samochód</th>
+                <th class="py-2.5 px-3">Ilość</th>
+                <th class="py-2.5 px-3">Pojazd</th>
               </tr>
             </thead>
             <tbody id="quotasTableBody" class="divide-y divide-slate-700/60"></tbody>
@@ -368,12 +377,10 @@
       </div>
     </div>
 
-    <!-- ==================== ZAKŁADKA 4: POJAZDY ==================== -->
+    <!-- ZAKŁADKA 4: POJAZDY -->
     <div id="tab-vehicles" class="tab-content hidden space-y-5 no-print">
       <div class="bg-slate-800 rounded-2xl border border-slate-700 p-5 shadow-xl">
         <h2 class="text-sm font-bold text-blue-400 uppercase tracking-wider mb-1">Baza Samochodów</h2>
-        <p class="text-xs text-slate-400 mb-4">Zarządzaj flotą pojazdów.</p>
-
         <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700 mb-5">
           <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
             <input type="text" id="newVehName" placeholder="Marka i model">
@@ -382,7 +389,6 @@
             <button type="button" onclick="addVehicle()" class="bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs px-4 py-2.5 rounded-lg transition">+ Dodaj</button>
           </div>
         </div>
-
         <div class="overflow-x-auto">
           <table class="w-full text-left text-xs">
             <thead>
@@ -401,19 +407,16 @@
       </div>
     </div>
 
-    <!-- ==================== ZAKŁADKA 5: KIEROWCY ==================== -->
+    <!-- ZAKŁADKA 5: KIEROWCY -->
     <div id="tab-drivers" class="tab-content hidden space-y-5 no-print">
       <div class="bg-slate-800 rounded-2xl border border-slate-700 p-5 shadow-xl">
         <h2 class="text-sm font-bold text-blue-400 uppercase tracking-wider mb-1">Baza Kierowców</h2>
-        <p class="text-xs text-slate-400 mb-4">Zarządzaj zespołem kierowców.</p>
-
         <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700 mb-5">
           <div class="flex flex-col sm:flex-row gap-3">
             <input type="text" id="newDriverName" placeholder="Imię i nazwisko..." class="flex-1">
             <button type="button" onclick="addDriver()" class="bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs px-5 py-2.5 rounded-lg transition">+ Dodaj</button>
           </div>
         </div>
-
         <div class="overflow-x-auto">
           <table class="w-full text-left text-xs">
             <thead>
@@ -429,12 +432,10 @@
       </div>
     </div>
 
-    <!-- ==================== ZAKŁADKA 6: KALENDARZ ==================== -->
+    <!-- ZAKŁADKA 6: KALENDARZ -->
     <div id="tab-calendar" class="tab-content hidden space-y-5 no-print">
       <div class="bg-slate-800 rounded-2xl border border-slate-700 p-5 shadow-xl">
         <h2 class="text-sm font-bold text-blue-400 uppercase tracking-wider mb-1">Kalendarz i Dni Robocze</h2>
-        <p class="text-xs text-slate-400 mb-4">Wybierz dni tygodnia lub wyłącz pojedyncze daty kliknięciem.</p>
-
         <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700 mb-5">
           <div class="text-xs font-semibold text-slate-300 uppercase mb-2.5">Aktywne dni tygodnia:</div>
           <div class="flex flex-wrap gap-2 mb-4">
@@ -446,16 +447,14 @@
             <button type="button" onclick="toggleDayOfWeek(6)" id="dow-6" class="px-3.5 py-2 rounded-lg text-xs font-bold bg-slate-800 text-slate-400 border border-slate-700">Sob</button>
             <button type="button" onclick="toggleDayOfWeek(0)" id="dow-0" class="px-3.5 py-2 rounded-lg text-xs font-bold bg-slate-800 text-slate-400 border border-slate-700">Niedz</button>
           </div>
-          
           <div class="flex flex-wrap gap-2">
             <button type="button" onclick="excludePolishHolidays()" class="bg-slate-800 hover:bg-slate-700 text-xs text-amber-300 border border-amber-500/40 px-3.5 py-2 rounded-lg transition">Wyłącz Święta PL</button>
             <button type="button" onclick="clearManualExclusions()" class="bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 border border-slate-600 px-3.5 py-2 rounded-lg transition">Reset wyłączeń</button>
           </div>
         </div>
-
         <div>
           <div class="flex justify-between items-center mb-2">
-            <h3 class="text-xs font-semibold text-slate-300 uppercase">Siatka dni (kliknij, by wyłączyć):</h3>
+            <h3 class="text-xs font-semibold text-slate-300 uppercase">Siatka dni:</h3>
             <span id="activeDaysCount" class="text-xs text-emerald-400 font-bold">0 dni</span>
           </div>
           <div id="calendarGrid" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-2 max-h-96 overflow-y-auto p-2.5 bg-slate-900/60 rounded-xl border border-slate-700"></div>
@@ -463,17 +462,13 @@
       </div>
     </div>
 
-    <!-- ==================== ZAKŁADKA 7: BAZA TRAS ==================== -->
+    <!-- ZAKŁADKA 7: TRASY -->
     <div id="tab-routes" class="tab-content hidden space-y-5 no-print">
       <div class="bg-slate-800 rounded-2xl border border-slate-700 p-5 shadow-xl">
         <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
-          <div>
-            <h2 class="text-sm font-bold text-blue-400 uppercase tracking-wider">Baza Lokalizacji RCKiK</h2>
-            <p class="text-xs text-slate-400">Zarządzaj bazą tras.</p>
-          </div>
+          <h2 class="text-sm font-bold text-blue-400 uppercase tracking-wider">Baza Lokalizacji RCKiK</h2>
           <button type="button" onclick="resetDefaultRoutes()" class="text-xs bg-slate-700 hover:bg-slate-600 text-slate-200 px-3 py-1.5 rounded-lg">Przywróć domyślne</button>
         </div>
-
         <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700 mb-5">
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <input type="text" id="newRouteName" placeholder="Nazwa lokalizacji">
@@ -481,7 +476,6 @@
             <button type="button" onclick="addRoute()" class="bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs px-4 py-2.5 rounded-lg transition">+ Dodaj</button>
           </div>
         </div>
-
         <div class="overflow-x-auto">
           <table class="w-full text-left text-xs">
             <thead>
@@ -490,7 +484,6 @@
                 <th class="py-2.5 px-3">Lokalizacja</th>
                 <th class="py-2.5 px-3 text-right">1 strona</th>
                 <th class="py-2.5 px-3 text-right">Tam i z powrotem</th>
-                <th class="py-2.5 px-3 text-right">Z narzutem 10%</th>
                 <th class="py-2.5 px-3 text-right">Usuń</th>
               </tr>
             </thead>
@@ -521,14 +514,10 @@
           if (!item) return fallback;
           const parsed = JSON.parse(item);
           return (Array.isArray(parsed) && parsed.length === 0) ? fallback : parsed;
-        } catch (err) {
-          return fallback;
-        }
+        } catch (err) { return fallback; }
       },
       set: function(key, value) {
-        try {
-          window.localStorage.setItem(key, JSON.stringify(value));
-        } catch (err) {}
+        try { window.localStorage.setItem(key, JSON.stringify(value)); } catch (err) {}
       }
     };
 
@@ -565,10 +554,10 @@
     ];
 
     let state = {
-      vehicles: safeStorage.get("ak_vehicles_v9", JSON.parse(JSON.stringify(DEFAULT_VEHICLES))),
-      drivers: safeStorage.get("ak_drivers_v9", JSON.parse(JSON.stringify(DEFAULT_DRIVERS))),
-      routes: safeStorage.get("ak_routes_v9", JSON.parse(JSON.stringify(DEFAULT_ROUTES))),
-      manualEntries: safeStorage.get("ak_manual_v9", []),
+      vehicles: safeStorage.get("ak_vehicles_v10", JSON.parse(JSON.stringify(DEFAULT_VEHICLES))),
+      drivers: safeStorage.get("ak_drivers_v10", JSON.parse(JSON.stringify(DEFAULT_DRIVERS))),
+      routes: safeStorage.get("ak_routes_v10", JSON.parse(JSON.stringify(DEFAULT_ROUTES))),
+      manualEntries: safeStorage.get("ak_manual_v10", []),
       activeDaysOfWeek: [1, 2, 3, 4, 5],
       excludedDates: new Set(),
       generatedRows: [],
@@ -590,10 +579,10 @@
     });
 
     function saveState() {
-      safeStorage.set("ak_vehicles_v9", state.vehicles);
-      safeStorage.set("ak_drivers_v9", state.drivers);
-      safeStorage.set("ak_routes_v9", state.routes);
-      safeStorage.set("ak_manual_v9", state.manualEntries);
+      safeStorage.set("ak_vehicles_v10", state.vehicles);
+      safeStorage.set("ak_drivers_v10", state.drivers);
+      safeStorage.set("ak_routes_v10", state.routes);
+      safeStorage.set("ak_manual_v10", state.manualEntries);
       updateBadges();
     }
 
@@ -655,7 +644,7 @@
     }
 
     // =========================================================================
-    // OBSŁUGA DZIENNIKA Z DRZEWKIEM LOKALIZACJI
+    // OBSŁUGA DZIENNIKA RZECZYWISTEGO (DRZEWKO + LICZNIKI OD-DO)
     // =========================================================================
     function renderManualJournal() {
       const vehSelect = document.getElementById("manualVehicle");
@@ -683,7 +672,6 @@
         if (curD) drvSelect.value = curD;
       }
 
-      // Renderuj drzewko lokalizacji (checkboxy z dystansami)
       const treeContainer = document.getElementById("locationTreeContainer");
       if (treeContainer) {
         const existingChecked = new Set();
@@ -706,14 +694,13 @@
         calcTreeKm();
       }
 
-      // Tabela wpisów w dzienniku
       const tbody = document.getElementById("manualTableBody");
       if (!tbody) return;
       tbody.innerHTML = "";
 
       if (state.manualEntries.length === 0) {
         const tr = document.createElement("tr");
-        tr.innerHTML = `<td colspan="6" class="py-4 text-center text-slate-500 italic">Brak wpisów w dzienniku. Zaznacz lokalizacje w drzewku i dodaj wyjazd.</td>`;
+        tr.innerHTML = `<td colspan="7" class="py-4 text-center text-slate-500 italic">Brak wpisów w dzienniku. Zaznacz lokalizacje w drzewku lub wpisz stany licznika i dodaj wyjazd.</td>`;
         tbody.appendChild(tr);
         return;
       }
@@ -721,14 +708,16 @@
       state.manualEntries.sort((a, b) => a.date.localeCompare(b.date));
       state.manualEntries.forEach(entry => {
         const vObj = state.vehicles.find(v => v.id == entry.vehicleId);
-        const vLabel = vObj ? `${vObj.name} [${vObj.plate}]` : "Auto nieznane";
+        const vLabel = vObj ? `${vObj.name} [${vObj.plate}]` : "Auto";
+        const odoText = (entry.odoStart && entry.odoEnd) ? `${entry.odoStart} &rarr; ${entry.odoEnd} km` : (entry.odoEnd ? `do ${entry.odoEnd} km` : '-');
         const tr = document.createElement("tr");
         tr.className = "hover:bg-slate-700/30";
         tr.innerHTML = `
           <td class="py-2.5 px-3 font-mono font-semibold text-white">${entry.date}</td>
           <td class="py-2.5 px-3 text-blue-300">${vLabel}</td>
           <td class="py-2.5 px-3 text-amber-300">${entry.driverName}</td>
-          <td class="py-2.5 px-3 font-medium">${entry.route}</td>
+          <td class="py-2.5 px-3 font-medium">${entry.route || 'Trasa wg licznika'}</td>
+          <td class="py-2.5 px-3 text-right font-mono text-slate-300">${odoText}</td>
           <td class="py-2.5 px-3 text-right font-mono font-bold text-emerald-400">${entry.km} km</td>
           <td class="py-2.5 px-3 text-right whitespace-nowrap">
             <button type="button" onclick="editManualEntry(${entry.id})" class="text-blue-400 hover:text-blue-300 mr-2">Edytuj</button>
@@ -737,6 +726,14 @@
         `;
         tbody.appendChild(tr);
       });
+    }
+
+    function onManualOdoInput() {
+      const s = parseInt(document.getElementById("manualOdoStart").value, 10);
+      const e = parseInt(document.getElementById("manualOdoEnd").value, 10);
+      if (!isNaN(s) && !isNaN(e) && e >= s) {
+        document.getElementById("manualDistCustom").value = e - s;
+      }
     }
 
     function calcTreeKm() {
@@ -749,8 +746,13 @@
         const rObj = state.routes.find(r => r.id === rId);
         if (rObj) totalKm += (rObj.km * 2);
       });
-      document.getElementById("treeSelectedKmSum").textContent = `Wybrano km: ${totalKm}`;
-      document.getElementById("calculatedManualKm").textContent = `${totalKm} km`;
+      document.getElementById("treeSelectedKmSum").textContent = `Zaznaczono km: ${totalKm}`;
+      
+      const customDistInput = document.getElementById("manualDistCustom");
+      if (!customDistInput.value || customDistInput.dataset.fromTree === "true" || customDistInput.value === "0") {
+        customDistInput.value = totalKm > 0 ? totalKm : "";
+        customDistInput.dataset.fromTree = "true";
+      }
     }
 
     function saveManualEntry() {
@@ -758,55 +760,65 @@
       const vehicleId = parseInt(document.getElementById("manualVehicle").value, 10);
       const driverName = document.getElementById("manualDriver").value;
       const editId = document.getElementById("editingManualId").value;
+      const odoStartVal = parseInt(document.getElementById("manualOdoStart").value, 10) || null;
+      const odoEndVal = parseInt(document.getElementById("manualOdoEnd").value, 10) || null;
+      let distVal = parseInt(document.getElementById("manualDistCustom").value, 10) || 0;
 
       const treeContainer = document.getElementById("locationTreeContainer");
-      const checkedBoxes = treeContainer.querySelectorAll('input[type="checkbox"]:checked');
+      const checkedBoxes = treeContainer ? treeContainer.querySelectorAll('input[type="checkbox"]:checked') : [];
 
       if (!date) return alert("Wybierz datę wyjazdu.");
-      if (checkedBoxes.length === 0) return alert("Zaznacz przynajmniej jedną lokalizację w drzewku.");
 
       let routeNames = [];
-      let totalKm = 0;
+      let treeKm = 0;
       checkedBoxes.forEach(cb => {
         const rId = parseInt(cb.value, 10);
         const rObj = state.routes.find(r => r.id === rId);
         if (rObj) {
           routeNames.push(rObj.name);
-          totalKm += (rObj.km * 2);
+          treeKm += (rObj.km * 2);
         }
       });
 
-      const routeCombinedStr = routeNames.join(" + ");
+      if (distVal <= 0 && treeKm > 0) distVal = treeKm;
+      if (distVal <= 0 && odoStartVal && odoEndVal && odoEndVal >= odoStartVal) distVal = odoEndVal - odoStartVal;
+      if (distVal <= 0) return alert("Zaznacz lokalizacje w drzewku lub wpisz przejechany dystans / stany licznika!");
+
+      const routeStr = routeNames.length > 0 ? routeNames.join(" + ") : "Trasa użytkownika";
 
       if (editId) {
-        // Edycja istniejącego wpisu
         const entry = state.manualEntries.find(e => e.id == editId);
         if (entry) {
           entry.date = date;
           entry.vehicleId = vehicleId;
           entry.driverName = driverName;
-          entry.route = routeCombinedStr;
-          entry.km = totalKm;
+          entry.route = routeStr;
+          entry.km = distVal;
+          entry.odoStart = odoStartVal;
+          entry.odoEnd = odoEndVal;
         }
-        document.getElementById("editingManualId").value = "";
-        document.getElementById("cancelEditBtn").classList.add("hidden");
-        document.getElementById("saveManualBtn").textContent = "+ Zapisz wpis w dzienniku";
+        cancelManualEdit();
       } else {
-        // Nowy wpis
         state.manualEntries.push({
           id: Date.now(),
           date,
           vehicleId,
           driverName,
-          route: routeCombinedStr,
-          km: totalKm
+          route: routeStr,
+          km: distVal,
+          odoStart: odoStartVal,
+          odoEnd: odoEndVal
         });
       }
 
       saveState();
       renderManualJournal();
-      // Odznacz checkboxy po zapisie
-      treeContainer.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+      if (treeContainer) {
+        treeContainer.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+      }
+      document.getElementById("manualOdoStart").value = "";
+      document.getElementById("manualOdoEnd").value = "";
+      document.getElementById("manualDistCustom").value = "";
       calcTreeKm();
     }
 
@@ -818,31 +830,36 @@
       document.getElementById("manualVehicle").value = entry.vehicleId;
       document.getElementById("manualDriver").value = entry.driverName;
       document.getElementById("editingManualId").value = entry.id;
+      document.getElementById("manualOdoStart").value = entry.odoStart || "";
+      document.getElementById("manualOdoEnd").value = entry.odoEnd || "";
+      document.getElementById("manualDistCustom").value = entry.km;
 
-      // Zaznacz odpowiednie lokalizacji w drzewku na podstawie nazwy
       const treeContainer = document.getElementById("locationTreeContainer");
-      treeContainer.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-        const rId = parseInt(cb.value, 10);
-        const rObj = state.routes.find(r => r.id === rId);
-        if (rObj && entry.route.includes(rObj.name)) {
-          cb.checked = true;
-        } else {
-          cb.checked = false;
-        }
-      });
+      if (treeContainer) {
+        treeContainer.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+          const rId = parseInt(cb.value, 10);
+          const rObj = state.routes.find(r => r.id === rId);
+          cb.checked = (rObj && entry.route && entry.route.includes(rObj.name));
+        });
+      }
       calcTreeKm();
 
       document.getElementById("cancelEditBtn").classList.remove("hidden");
-      document.getElementById("saveManualBtn").textContent = "Zapisz zmiany w wpisie";
+      document.getElementById("saveManualBtn").textContent = "Zapisz zmiany";
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     function cancelManualEdit() {
       document.getElementById("editingManualId").value = "";
       document.getElementById("cancelEditBtn").classList.add("hidden");
-      document.getElementById("saveManualBtn").textContent = "+ Zapisz wpis w dzienniku";
+      document.getElementById("saveManualBtn").textContent = "+ Dodaj wyjazd do dziennika";
       const treeContainer = document.getElementById("locationTreeContainer");
-      treeContainer.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+      if (treeContainer) {
+        treeContainer.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+      }
+      document.getElementById("manualOdoStart").value = "";
+      document.getElementById("manualOdoEnd").value = "";
+      document.getElementById("manualDistCustom").value = "";
       calcTreeKm();
     }
 
@@ -853,7 +870,7 @@
     }
 
     // =========================================================================
-    // POMOCNICZE DAT I KALENDARZA
+    // OBSŁUGA DAT I KALENDARZA
     // =========================================================================
     function parseLocalIso(isoStr) {
       if (!isoStr) return new Date();
@@ -981,11 +998,11 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-3 bg-slate-900/80 p-2.5 rounded-lg border border-slate-800">
               <div>
-                <label class="block text-[11px] text-blue-300 font-semibold mb-1">Data od</label>
+                <label class="block text-[11px] text-blue-300 font-semibold mb-1">Data OD generatora</label>
                 <input type="date" value="${v.dateFrom}" ${!v.selected ? 'disabled' : ''} onchange="onVehicleDateChange(${v.id}, 'from', this.value)" class="w-full text-xs">
               </div>
               <div>
-                <label class="block text-[11px] text-blue-300 font-semibold mb-1">Data do</label>
+                <label class="block text-[11px] text-blue-300 font-semibold mb-1">Data DO generatora</label>
                 <input type="date" value="${v.dateTo}" ${!v.selected ? 'disabled' : ''} onchange="onVehicleDateChange(${v.id}, 'to', this.value)" class="w-full text-xs">
               </div>
             </div>
@@ -1251,7 +1268,6 @@
       tbody.innerHTML = "";
       state.routes.forEach((r, idx) => {
         const roundTrip = r.km * 2;
-        const maxWithSpread = Math.round(roundTrip * 1.10);
         const tr = document.createElement("tr");
         tr.className = "hover:bg-slate-700/30";
         tr.innerHTML = `
@@ -1259,7 +1275,6 @@
           <td class="py-2.5 px-3 font-semibold text-white">${r.name}</td>
           <td class="py-2.5 px-3 text-right font-mono text-slate-300">${r.km} km</td>
           <td class="py-2.5 px-3 text-right font-mono text-blue-300 font-semibold">${roundTrip} km</td>
-          <td class="py-2.5 px-3 text-right font-mono text-emerald-400">${roundTrip} &ndash; ${maxWithSpread} km</td>
           <td class="py-2.5 px-3 text-right"><button type="button" onclick="deleteRoute(${r.id})" class="text-rose-400 hover:text-rose-300 px-2 py-1">Usuń</button></td>
         `;
         tbody.appendChild(tr);
@@ -1300,7 +1315,7 @@
     }
 
     // =========================================================================
-    // HYBRYDOWY SOLVER Z WYPEŁNIANIEM LUK W MIESIĄCU
+    // HYBRYDOWY GENERATOR Z SEGMENTOWANIEM LICZNIKÓW I LUK
     // =========================================================================
     function generateMultiSchedule() {
       const selectedVehicles = state.vehicles.filter(v => v.selected);
@@ -1313,139 +1328,132 @@
       const useRandomSpread = document.getElementById("optRandomSpread").checked;
       const mult = isRoundTrip ? 2 : 1;
 
-      // 1. Wpisy z dziennika jako nienaruszalny szkielet
       let allCombinedTrips = [];
       const usedRoutesByDate = {};
 
-      state.manualEntries.forEach(m => {
-        const vObj = state.vehicles.find(v => v.id == m.vehicleId);
-        if (!vObj) return;
-        if (!usedRoutesByDate[m.date]) usedRoutesByDate[m.date] = new Set();
+      for (const v of selectedVehicles) {
+        const vActiveDates = getActiveDatesForVehicle(v).map(d => formatIso(d));
+        if (vActiveDates.length === 0) return alert(`Samochód ${v.name} nie ma aktywnych dni roboczych.`);
 
-        allCombinedTrips.push({
-          date: m.date,
-          vehicleId: vObj.id,
-          vehicleName: vObj.name,
-          vehiclePlate: vObj.plate,
-          vehicleLabel: `${vObj.name} [${vObj.plate}]`,
-          driverName: m.driverName,
-          route: m.route,
-          baseKm: m.km,
-          km: m.km,
-          isManual: true
+        // Pobierz i posortuj wpisy z dziennika dla tego auta
+        const carManualEntries = state.manualEntries
+          .filter(m => m.vehicleId == v.id && vActiveDates.includes(m.date))
+          .sort((a, b) => a.date.localeCompare(b.date));
+
+        // Zbuduj punkty kontrolne (checkpoints): Start okresu -> Wpisy manualne -> Koniec okresu
+        const checkpoints = [];
+        checkpoints.push({
+          date: v.dateFrom,
+          odo: parseInt(v.startOdo, 10),
+          isStart: true
         });
-      });
 
-      // 2. Dla każdego pojazdu wypełnij luki i brakujące kilometry
-      const vehicleBuckets = {};
-      for (const v of selectedVehicles) {
-        const manualForVeh = allCombinedTrips.filter(t => t.vehicleId === v.id);
-        const manualKmSum = manualForVeh.reduce((s, t) => s + t.km, 0);
-        const remainingTarget = v.targetKm - manualKmSum;
-
-        const vActiveDates = getActiveDatesForVehicle(v);
-        vehicleBuckets[v.id] = {
-          vehicle: v,
-          activeDates: vActiveDates.map(d => formatIso(d)),
-          fixedTrips: [],
-          allTrips: []
-        };
-
-        if (remainingTarget > 0) {
-          const fixedRoutes = state.routes.filter(r => r.mode === 'fixed' && r.count > 0 && (r.assignTo === 'ALL' || String(r.assignTo) === String(v.id)));
-          fixedRoutes.forEach(r => {
-            for (let i = 0; i < r.count; i++) {
-              vehicleBuckets[v.id].fixedTrips.push(createTripInstance(r, mult, useRandomSpread));
-            }
+        carManualEntries.forEach(m => {
+          checkpoints.push({
+            date: m.date,
+            manualEntry: m,
+            isManual: true
           });
+        });
 
-          const fixedSum = vehicleBuckets[v.id].fixedTrips.reduce((s, t) => s + t.km, 0);
-          const autoNeeded = remainingTarget - fixedSum;
+        checkpoints.push({
+          date: v.dateTo,
+          odo: parseInt(v.endOdo, 10),
+          isEnd: true
+        });
 
-          let autoPool = state.routes.filter(r => r.mode === 'auto' && (r.assignTo === 'ALL' || String(r.assignTo) === String(v.id)));
-          if (autoPool.length === 0) autoPool = state.routes;
+        // Wypełnij braki kilometrów pomiędzy punktami
+        let currentCarTrips = [];
+        const manualDatesSet = new Set(carManualEntries.map(m => m.date));
+        const gapDates = vActiveDates.filter(d => !manualDatesSet.has(d));
 
-          if (autoNeeded > 0) {
-            let bestExtra = [], bestErr = Infinity;
-            const maxTotalTrips = Math.max(vehicleBuckets[v.id].activeDates.length, vehicleBuckets[v.id].fixedTrips.length + 2);
+        // Oblicz łączny dystans ręczny
+        const totalManualKm = carManualEntries.reduce((s, m) => s + m.km, 0);
+        let neededGapKm = v.targetKm - totalManualKm;
 
-            for (let it = 0; it < 2500; it++) {
-              let extra = [], sum = 0;
-              while (vehicleBuckets[v.id].fixedTrips.length + extra.length < maxTotalTrips && sum < autoNeeded) {
-                const r = autoPool[Math.floor(Math.random() * autoPool.length)];
-                const t = createTripInstance(r, mult, useRandomSpread);
-                if (sum + t.km <= autoNeeded + 70) { extra.push(t); sum += t.km; }
-                else {
-                  const shorter = autoPool.filter(sr => (sr.km * mult) <= (autoNeeded - sum + 25));
-                  if (shorter.length > 0) {
-                    const sr = shorter[Math.floor(Math.random() * shorter.length)];
-                    extra.push(createTripInstance(sr, mult, useRandomSpread));
-                    sum += extra[extra.length - 1].km;
-                  }
-                  break;
+        let autoPool = state.routes.filter(r => r.mode === 'auto' && (r.assignTo === 'ALL' || String(r.assignTo) === String(v.id)));
+        if (autoPool.length === 0) autoPool = state.routes;
+
+        // Dobierz z puli trasy sztywne
+        let gapTrips = [];
+        const fixedRoutes = state.routes.filter(r => r.mode === 'fixed' && r.count > 0 && (r.assignTo === 'ALL' || String(r.assignTo) === String(v.id)));
+        fixedRoutes.forEach(r => {
+          for (let i = 0; i < r.count; i++) {
+            gapTrips.push(createTripInstance(r, mult, useRandomSpread));
+          }
+        });
+
+        const fixedKmSum = gapTrips.reduce((s, t) => s + t.km, 0);
+        let remainForAuto = neededGapKm - fixedKmSum;
+
+        if (remainForAuto > 0) {
+          let bestExtra = [], bestErr = Infinity;
+          for (let it = 0; it < 2500; it++) {
+            let extra = [], sum = 0;
+            while (gapTrips.length + extra.length < gapDates.length + 2 && sum < remainForAuto) {
+              const r = autoPool[Math.floor(Math.random() * autoPool.length)];
+              const t = createTripInstance(r, mult, useRandomSpread);
+              if (sum + t.km <= remainForAuto + 70) {
+                extra.push(t); sum += t.km;
+              } else {
+                const shorter = autoPool.filter(sr => (sr.km * mult) <= (remainForAuto - sum + 25));
+                if (shorter.length > 0) {
+                  const sr = shorter[Math.floor(Math.random() * shorter.length)];
+                  extra.push(createTripInstance(sr, mult, useRandomSpread));
+                  sum += extra[extra.length - 1].km;
                 }
+                break;
               }
-              const err = Math.abs(autoNeeded - sum);
-              if (err < bestErr) { bestErr = err; bestExtra = extra; if (err === 0) break; }
             }
-            vehicleBuckets[v.id].allTrips = [...vehicleBuckets[v.id].fixedTrips, ...bestExtra];
-          } else {
-            vehicleBuckets[v.id].allTrips = [...vehicleBuckets[v.id].fixedTrips];
+            const err = Math.abs(remainForAuto - sum);
+            if (err < bestErr) { bestErr = err; bestExtra = extra; if (err === 0) break; }
           }
-
-          if (vehicleBuckets[v.id].allTrips.length > 0) {
-            let currSum = vehicleBuckets[v.id].allTrips.reduce((s, t) => s + t.km, 0);
-            let diff = autoNeeded - currSum, guard = 0;
-            while (diff !== 0 && guard < 3000) {
-              guard++; let changed = false;
-              for (let i = 0; i < vehicleBuckets[v.id].allTrips.length && diff !== 0; i++) {
-                const trp = vehicleBuckets[v.id].allTrips[i];
-                if (diff > 0 && trp.km < trp.maxKm) { trp.km += 1; diff -= 1; changed = true; }
-                else if (diff < 0 && trp.km > trp.baseKm) { trp.km -= 1; diff += 1; changed = true; }
-              }
-              if (!changed) break;
-            }
-            if (diff !== 0) vehicleBuckets[v.id].allTrips[vehicleBuckets[v.id].allTrips.length - 1].km += diff;
-          }
+          gapTrips = [...gapTrips, ...bestExtra];
         }
-      }
 
-      // 3. Wypełnienie luk w miesiącu pomiędzy wpisami z dziennika
-      for (const v of selectedVehicles) {
-        const bucket = vehicleBuckets[v.id];
-        const trips = bucket.allTrips;
-        if (trips.length === 0) continue;
+        // Domknięcie co do kilometra
+        if (gapTrips.length > 0) {
+          let currGapSum = gapTrips.reduce((s, t) => s + t.km, 0);
+          let diff = neededGapKm - currGapSum, guard = 0;
+          while (diff !== 0 && guard < 3000) {
+            guard++; let changed = false;
+            for (let i = 0; i < gapTrips.length && diff !== 0; i++) {
+              const trp = gapTrips[i];
+              if (diff > 0 && trp.km < trp.maxKm) { trp.km += 1; diff -= 1; changed = true; }
+              else if (diff < 0 && trp.km > trp.baseKm) { trp.km -= 1; diff += 1; changed = true; }
+            }
+            if (!changed) break;
+          }
+          if (diff !== 0) gapTrips[gapTrips.length - 1].km += diff;
+        }
 
-        const manualDatesForThisCar = new Set(allCombinedTrips.filter(t => t.vehicleId === v.id).map(t => t.date));
-        // Dni robocze, które nie mają sztywnego wpisu w dzienniku (czyli luki)
-        const gapDates = bucket.activeDates.filter(d => !manualDatesForThisCar.has(d));
-
-        trips.sort(() => Math.random() - 0.5);
+        // Rozłóż gapTrips na wolne dni
+        gapTrips.sort(() => Math.random() - 0.5);
         let candidateDates = [];
         if (gapDates.length > 0) {
-          if (trips.length <= gapDates.length) {
+          if (gapTrips.length <= gapDates.length) {
             const idxs = Array.from({ length: gapDates.length }, (_, i) => i).sort(() => Math.random() - 0.5);
-            candidateDates = idxs.slice(0, trips.length).sort((a, b) => a - b).map(i => gapDates[i]);
+            candidateDates = idxs.slice(0, gapTrips.length).sort((a, b) => a - b).map(i => gapDates[i]);
           } else {
-            for (let i = 0; i < trips.length; i++) candidateDates.push(gapDates[i % gapDates.length]);
+            for (let i = 0; i < gapTrips.length; i++) candidateDates.push(gapDates[i % gapDates.length]);
             candidateDates.sort();
           }
         } else {
-          candidateDates = bucket.activeDates;
+          candidateDates = vActiveDates;
         }
 
-        const unassignedTrips = [...trips];
+        const unassignedGap = [...gapTrips];
         for (let dIdx = 0; dIdx < candidateDates.length; dIdx++) {
           const dStr = candidateDates[dIdx];
           if (!usedRoutesByDate[dStr]) usedRoutesByDate[dStr] = new Set();
           const conflictSet = usedRoutesByDate[dStr];
-          let pickIndex = unassignedTrips.findIndex(t => !conflictSet.has(t.routeId));
+          let pickIndex = unassignedGap.findIndex(t => !conflictSet.has(t.routeId));
           if (pickIndex === -1) pickIndex = 0;
-          const chosenTrip = unassignedTrips.splice(pickIndex, 1)[0];
+          const chosenTrip = unassignedGap.splice(pickIndex, 1)[0];
           chosenTrip.date = dStr;
           conflictSet.add(chosenTrip.routeId);
 
-          allCombinedTrips.push({
+          currentCarTrips.push({
             date: dStr,
             vehicleId: v.id,
             vehicleName: v.name,
@@ -1458,11 +1466,33 @@
             isManual: false
           });
         }
+
+        // Dodaj wpisy z dziennika dla tego auta
+        carManualEntries.forEach(m => {
+          currentCarTrips.push({
+            date: m.date,
+            vehicleId: v.id,
+            vehicleName: v.name,
+            vehiclePlate: v.plate,
+            vehicleLabel: `${v.name} [${v.plate}]`,
+            driverName: m.driverName,
+            route: m.route,
+            baseKm: m.km,
+            km: m.km,
+            isManual: true,
+            presetOdoStart: m.odoStart,
+            presetOdoEnd: m.odoEnd
+          });
+        });
+
+        // Posortuj wszystkie dni dla tego auta
+        currentCarTrips.sort((a, b) => a.date.localeCompare(b.date));
+        allCombinedTrips = [...allCombinedTrips, ...currentCarTrips];
       }
 
       allCombinedTrips.sort((a, b) => a.date !== b.date ? a.date.localeCompare(b.date) : a.vehicleId - b.vehicleId);
 
-      // 4. Przypisanie kierowców uwzględniając wpisy z dziennika
+      // Przypisanie kierowców
       let driverBag = [];
       const usedDriversOnDate = {};
       allCombinedTrips.forEach(row => {
@@ -1628,7 +1658,7 @@
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
-      a.href = url; a.download = "baza_kilometrowka_v9.json";
+      a.href = url; a.download = "baza_kilometrowka_v10.json";
       document.body.appendChild(a); a.click(); document.body.removeChild(a);
     }
 
