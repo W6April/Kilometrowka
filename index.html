@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>AutoKilometrówka Pro v10.0</title>
+  <title>AutoKilometrówka Pro v11.0 - Cloud & Instant</title>
   
   <meta name="theme-color" content="#0f172a">
   <meta name="mobile-web-app-capable" content="yes">
@@ -11,8 +11,6 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Kilometrówka">
   
-  <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22AutoKilometr%C3%B3wka%20Pro%22%2C%22short_name%22%3A%22Kilometr%C3%B3wka%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230f172a%22%2C%22theme_color%22%3A%22%232563eb%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20512%20512%27%3E%3Crect%20width%3D%27512%27%20height%3D%27512%27%20rx%3D%27110%27%20fill%3D%27%232563eb%27%2F%3E%3Cpath%20d%3D%27M110%20350h292M150%20210l45-75h122l45%2075M130%20210h252c20%200%2030%2015%2030%2035v70H100v-70c0-20%2010-35%2030-35z%27%20stroke%3D%27white%27%20stroke-width%3D%2726%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%20fill%3D%27none%27%2F%3E%3Ccircle%20cx%3D%27165%27%20cy%3D%27315%27%20r%3D%2726%27%20fill%3D%27white%27%2F%3E%3Ccircle%20cx%3D%27347%27%20cy%3D%27315%27%20r%3D%2726%27%20fill%3D%27white%27%2F%3E%3C%2Fsvg%3E%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D">
-
   <script src="https://cdn.tailwindcss.com"></script>
   
   <style>
@@ -21,8 +19,7 @@
       background-color: #0f172a;
       color: #f1f5f9;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      margin: 0;
-      padding: 0;
+      margin: 0; padding: 0;
     }
     select, input[type="date"], input[type="number"], input[type="text"] {
       background-color: #0f172a;
@@ -69,7 +66,7 @@
 </head>
 <body class="min-h-screen flex flex-col">
 
-  <!-- NAGŁÓWEK -->
+  <!-- NAGŁÓWEK Z DIODĄ CHMURY -->
   <header class="bg-slate-800 border-b border-slate-700 sticky top-0 z-30 no-print shadow-md">
     <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-2">
       <div class="flex items-center space-x-3">
@@ -79,18 +76,23 @@
         <div>
           <div class="flex items-center gap-2">
             <h1 class="text-base sm:text-lg font-bold tracking-tight text-white">AutoKilometrówka Pro</h1>
-            <span class="text-[11px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full font-mono">v10.0</span>
+            <span class="text-[11px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full font-mono">v11.0 Cloud</span>
           </div>
-          <p class="text-xs text-slate-400">Ręczny dziennik z licznikami + elastyczny generator luk</p>
+          <div class="flex items-center gap-2 text-xs">
+            <span id="cloudStatusBadge" class="inline-flex items-center gap-1 text-[11px] text-emerald-400">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Autozapis aktywny
+            </span>
+            <button onclick="toggleCloudConfigModal()" class="text-blue-400 hover:underline text-[11px]">(Ustawienia chmury)</button>
+          </div>
         </div>
       </div>
       
       <div class="flex items-center gap-1.5">
-        <button type="button" onclick="resetAllToDefaults()" class="bg-slate-700 hover:bg-slate-600 text-xs text-amber-300 px-2.5 py-2 rounded-lg border border-slate-600 transition">
-          Reset
+        <button type="button" onclick="manualCloudSync()" class="bg-blue-600/30 hover:bg-blue-600/50 text-blue-200 border border-blue-500/40 text-xs px-2.5 py-2 rounded-lg transition">
+          Synchronizuj teraz
         </button>
         <button type="button" onclick="exportJSON()" class="bg-slate-700 hover:bg-slate-600 text-xs text-slate-200 px-2.5 py-2 rounded-lg border border-slate-600 transition">
-          Zapisz bazę
+          Kopia JSON
         </button>
         <label class="bg-slate-700 hover:bg-slate-600 text-xs text-slate-200 px-2.5 py-2 rounded-lg border border-slate-600 cursor-pointer transition">
           Wgraj
@@ -99,6 +101,31 @@
       </div>
     </div>
   </header>
+
+  <!-- MODAL KONFIGURACJI CHMURY -->
+  <div id="cloudModal" class="hidden fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4">
+    <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-5 space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-700 pb-2">
+        <h3 class="text-sm font-bold text-white uppercase">Konfiguracja Chmury (JSONBin.io)</h3>
+        <button onclick="toggleCloudConfigModal()" class="text-slate-400 hover:text-white font-bold">✕</button>
+      </div>
+      <p class="text-xs text-slate-300">
+        Możesz podpiąć darmowe konto z <strong>JSONBin.io</strong>, by mieć wspólną bazę na telefonie i komputerze bez ryzyka skasowania:
+      </p>
+      <div>
+        <label class="block text-[11px] text-slate-400 mb-1">Master Key ($2a$10...)</label>
+        <input type="text" id="cfgCloudKey" placeholder="Wklej Master Key z JSONBin" class="w-full text-xs font-mono">
+      </div>
+      <div>
+        <label class="block text-[11px] text-slate-400 mb-1">Bin ID (np. 651234abcd...)</label>
+        <input type="text" id="cfgCloudBin" placeholder="Wklej ID skrzynki Bin" class="w-full text-xs font-mono">
+      </div>
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="toggleCloudConfigModal()" class="bg-slate-700 hover:bg-slate-600 text-xs px-3 py-2 rounded-lg">Anuluj</button>
+        <button onclick="saveCloudConfig()" class="bg-blue-600 hover:bg-blue-500 text-xs font-bold text-white px-4 py-2 rounded-lg">Zapisz i połącz</button>
+      </div>
+    </div>
+  </div>
 
   <!-- PASEK ZAKŁADEK -->
   <div class="max-w-7xl mx-auto px-4 pt-3 w-full no-print">
@@ -138,15 +165,15 @@
               Dziennik Rzeczywistych Wyjazdów
             </h2>
             <p class="text-xs text-slate-300 mt-0.5">
-              Wpisz znane Ci trasy i stany liczników. Twój wpis nie musi być pierwszy w miesiącu – generator wypełni luki przed nim i po nim!
+              Wpisz zrealizowane trasy. Po kliknięciu „Dodaj” wpis natychmiast pojawia się w tabeli i zapisuje w chmurze.
             </p>
           </div>
           <button type="button" onclick="switchTab('tab-generate')" class="text-xs bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold px-4 py-2 rounded-xl shadow transition">
-            Przejdź do Generatora i Liczników &rarr;
+            Generator i Domykanie Liczników &rarr;
           </button>
         </div>
 
-        <!-- Formularz dodawania do dziennika -->
+        <!-- Formularz wpisu -->
         <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-700/80 mb-5 space-y-3.5">
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
@@ -163,23 +190,21 @@
             </div>
           </div>
 
-          <!-- Stany licznika dla wpisu manualnego -->
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-slate-800/80 p-3 rounded-lg border border-slate-700">
             <div>
               <label class="block text-[11px] text-blue-300 font-semibold mb-1">Stan licznika OD (km)</label>
-              <input type="number" id="manualOdoStart" placeholder="Opcjonalnie np. 142100" class="w-full text-xs font-mono" oninput="onManualOdoInput()">
+              <input type="number" id="manualOdoStart" placeholder="np. 142100" class="w-full text-xs font-mono" oninput="onManualOdoInput()">
             </div>
             <div>
               <label class="block text-[11px] text-blue-300 font-semibold mb-1">Stan licznika DO (km)</label>
-              <input type="number" id="manualOdoEnd" placeholder="Opcjonalnie np. 142460" class="w-full text-xs font-mono" oninput="onManualOdoInput()">
+              <input type="number" id="manualOdoEnd" placeholder="np. 142460" class="w-full text-xs font-mono" oninput="onManualOdoInput()">
             </div>
             <div>
               <label class="block text-[11px] text-emerald-400 font-semibold mb-1">Przejechany dystans (km)</label>
-              <input type="number" id="manualDistCustom" placeholder="Liczony z tras lub z licznika" class="w-full text-xs font-mono font-bold text-emerald-400">
+              <input type="number" id="manualDistCustom" placeholder="Liczony automatycznie" class="w-full text-xs font-mono font-bold text-emerald-400">
             </div>
           </div>
 
-          <!-- Drzewko lokalizacji -->
           <div class="bg-slate-800/90 border border-slate-700 rounded-xl p-3">
             <div class="flex items-center justify-between mb-2">
               <span class="text-xs font-bold text-amber-300 uppercase">Drzewko lokalizacji (zaznacz cel):</span>
@@ -189,18 +214,18 @@
           </div>
 
           <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
-            <span class="text-xs text-slate-400">Wpisz liczniki lub zaznacz cele z drzewka (możesz też łączyć jedno i drugie).</span>
+            <span class="text-xs text-slate-400">Wybierz trasy z drzewka lub podaj stan licznika.</span>
             <div class="flex gap-2">
               <input type="hidden" id="editingManualId" value="">
               <button type="button" id="cancelEditBtn" onclick="cancelManualEdit()" class="hidden bg-slate-700 hover:bg-slate-600 text-xs px-3 py-2 rounded-lg">Anuluj edycję</button>
-              <button type="button" onclick="saveManualEntry()" id="saveManualBtn" class="bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs px-5 py-2.5 rounded-lg transition">
+              <button type="button" onclick="saveManualEntry()" id="saveManualBtn" class="bg-blue-600 hover:bg-blue-500 active:scale-95 text-white font-semibold text-xs px-5 py-2.5 rounded-lg transition shadow-md">
                 + Dodaj wyjazd do dziennika
               </button>
             </div>
           </div>
         </div>
 
-        <!-- Tabela wpisów w dzienniku -->
+        <!-- Tabela wpisów dziennika -->
         <div class="overflow-x-auto">
           <table class="w-full text-left text-xs border-collapse">
             <thead>
@@ -208,8 +233,8 @@
                 <th class="py-2.5 px-3">Data</th>
                 <th class="py-2.5 px-3">Pojazd</th>
                 <th class="py-2.5 px-3">Kierowca</th>
-                <th class="py-2.5 px-3">Zaznaczone lokalizacje (Cel)</th>
-                <th class="py-2.5 px-3 text-right">Licznik: Od &rarr; Do</th>
+                <th class="py-2.5 px-3">Cel / Trasa</th>
+                <th class="py-2.5 px-3 text-right">Licznik Od &rarr; Do</th>
                 <th class="py-2.5 px-3 text-right">Dystans (km)</th>
                 <th class="py-2.5 px-3 text-right">Akcja</th>
               </tr>
@@ -220,44 +245,21 @@
       </div>
     </div>
 
-    <!-- ==================== ZAKŁADKA 2: GENERATOR / LICZNIKI ==================== -->
+    <!-- ==================== ZAKŁADKA 2: GENERATOR ==================== -->
     <div id="tab-generate" class="tab-content hidden space-y-5">
       <div class="bg-slate-800 rounded-2xl border border-slate-700 p-4 sm:p-5 shadow-xl no-print">
-        
         <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
           <div>
             <h2 class="text-xs font-bold text-blue-400 uppercase tracking-wider">
               Krok 2: Parametry główne generatora
             </h2>
             <p class="text-xs text-slate-400">
-              Wybierz od kiedy do kiedy generator ma rozliczyć samochód oraz jaki jest stan licznika na początku i na końcu całego okresu.
+              Generator dopełnia luki między Twoimi wpisami w dniach roboczych (weekendy wyłączone).
             </p>
           </div>
           <div class="flex flex-wrap gap-2">
-            <button type="button" onclick="selectAllVehicles(true)" class="text-xs bg-slate-700 hover:bg-slate-600 text-slate-200 px-2.5 py-1.5 rounded-lg">
-              Zaznacz wszystkie
-            </button>
-            <button type="button" onclick="switchTab('tab-quotas')" class="text-xs bg-amber-500/25 hover:bg-amber-500/35 text-amber-300 border border-amber-500/40 px-2.5 py-1.5 rounded-lg font-semibold">
-              Limity lokalizacji &rarr;
-            </button>
-          </div>
-        </div>
-
-        <!-- Pasek globalnych dat -->
-        <div class="bg-slate-900/90 p-3 rounded-xl border border-slate-700/80 mb-4 flex flex-wrap items-end justify-between gap-3">
-          <div class="flex flex-wrap items-center gap-3">
-            <span class="text-xs font-semibold text-slate-300">Ustawienie dat od-do dla wszystkich aut:</span>
-            <div class="flex items-center gap-1.5">
-              <span class="text-[11px] text-slate-400">Od:</span>
-              <input type="date" id="globalDateFrom" class="py-1 px-2 text-xs">
-            </div>
-            <div class="flex items-center gap-1.5">
-              <span class="text-[11px] text-slate-400">Do:</span>
-              <input type="date" id="globalDateTo" class="py-1 px-2 text-xs">
-            </div>
-            <button type="button" onclick="applyGlobalDatesToAllVehicles()" class="bg-blue-600/30 hover:bg-blue-600/50 text-blue-200 border border-blue-500/40 text-xs font-semibold px-3 py-1.5 rounded-lg transition">
-              Zastosuj
-            </button>
+            <button type="button" onclick="selectAllVehicles(true)" class="text-xs bg-slate-700 hover:bg-slate-600 text-slate-200 px-2.5 py-1.5 rounded-lg">Zaznacz wszystkie</button>
+            <button type="button" onclick="switchTab('tab-quotas')" class="text-xs bg-amber-500/25 hover:bg-amber-500/35 text-amber-300 border border-amber-500/40 px-2.5 py-1.5 rounded-lg font-semibold">Limity lokalizacji &rarr;</button>
           </div>
         </div>
 
@@ -268,19 +270,19 @@
             <input type="checkbox" id="optRoundTrip" checked onchange="renderQuotasTable()" class="mt-1 w-4 h-4 rounded text-blue-600">
             <div>
               <div class="text-xs font-bold text-slate-200">Licz trasy bazowe tam i z powrotem (×2)</div>
-              <div class="text-[11px] text-slate-400">Dotyczy dobieranych automatycznie tras</div>
+              <div class="text-[11px] text-slate-400">Mnoży podany w bazie dystans razy dwa</div>
             </div>
           </label>
           <label class="flex items-start gap-3 p-3 rounded-xl bg-slate-900/60 border border-slate-700/80 cursor-pointer hover:bg-slate-900">
             <input type="checkbox" id="optRandomSpread" checked class="mt-1 w-4 h-4 rounded text-blue-600">
             <div>
               <div class="text-xs font-bold text-slate-200">Losowy narzut do 10% przy wypełnianiu luk</div>
-              <div class="text-[11px] text-slate-400">Dopełniane trasy zyskają realny rozrzut</div>
+              <div class="text-[11px] text-slate-400">Dopełniane trasy zyskują realny rozrzut</div>
             </div>
           </label>
         </div>
 
-        <button type="button" onclick="generateMultiSchedule()" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg text-sm tracking-wide transition">
+        <button type="button" onclick="generateMultiSchedule()" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg text-sm tracking-wide transition active:scale-[0.99]">
           WYGENERUJ / WYPEŁNIJ LUKI I ZAMKNIJ LICZNIKI
         </button>
       </div>
@@ -293,15 +295,9 @@
             <p id="resultsSummary" class="text-xs text-emerald-400 font-medium mt-0.5"></p>
           </div>
           <div class="flex flex-wrap items-center gap-2">
-            <button type="button" onclick="generateMultiSchedule()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-semibold px-3 py-2 rounded-lg border border-slate-600 transition">
-              Przelosuj wypełnienie luk
-            </button>
-            <button type="button" onclick="exportCSV()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-3.5 py-2 rounded-lg shadow transition">
-              Pobierz CSV (Excel)
-            </button>
-            <button type="button" onclick="window.print()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-3.5 py-2 rounded-lg shadow transition">
-              Drukuj karty (PDF / A4)
-            </button>
+            <button type="button" onclick="generateMultiSchedule()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-semibold px-3 py-2 rounded-lg border border-slate-600 transition">Przelosuj luki</button>
+            <button type="button" onclick="exportCSV()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-3.5 py-2 rounded-lg shadow transition">Pobierz CSV</button>
+            <button type="button" onclick="window.print()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-3.5 py-2 rounded-lg shadow transition">Drukuj (PDF/A4)</button>
           </div>
         </div>
 
@@ -318,8 +314,8 @@
                 <th class="py-2.5 px-2.5">Data</th>
                 <th class="py-2.5 px-2.5">Pojazd</th>
                 <th class="py-2.5 px-2.5">Kierowca</th>
-                <th class="py-2.5 px-2.5">Trasa / Cel wyjazdu</th>
-                <th class="py-2.5 px-2.5 text-right font-mono">Stan licznika: Od &rarr; Do</th>
+                <th class="py-2.5 px-2.5">Trasa / Cel</th>
+                <th class="py-2.5 px-2.5 text-right font-mono">Licznik Od &rarr; Do</th>
                 <th class="py-2.5 px-2.5 text-right">Dystans (km)</th>
                 <th class="py-2.5 px-2 text-center">Usuń</th>
               </tr>
@@ -344,20 +340,13 @@
       <div class="bg-slate-800 rounded-2xl border border-slate-700 p-4 sm:p-5 shadow-xl">
         <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
           <div>
-            <h2 class="text-sm font-bold text-amber-400 uppercase tracking-wider">
-              Pula Lokalizacji do Wypełniania Luk
-            </h2>
+            <h2 class="text-sm font-bold text-amber-400 uppercase tracking-wider">Pula Lokalizacji do Wypełniania Luk</h2>
             <p class="text-xs text-slate-300 mt-0.5">Wybierz krotności tras, z których generator ma losować przy dopełnianiu kilometrów.</p>
           </div>
           <div class="flex flex-wrap gap-2">
-            <button type="button" onclick="setAllQuotas('auto')" class="text-xs bg-blue-600/30 hover:bg-blue-600/50 text-blue-200 border border-blue-500/40 px-3 py-1.5 rounded-lg">Ustaw na Auto</button>
+            <button type="button" onclick="setAllQuotas('auto')" class="text-xs bg-blue-600/30 hover:bg-blue-600/50 text-blue-200 border border-blue-500/40 px-3 py-1.5 rounded-lg">Wszystkie Auto</button>
             <button type="button" onclick="setAllQuotas('zero')" class="text-xs bg-slate-700 hover:bg-slate-600 text-slate-300 px-3 py-1.5 rounded-lg">Wyzeruj (0)</button>
           </div>
-        </div>
-
-        <div id="quotaSummaryBanner" class="bg-slate-900/90 border border-slate-700 rounded-xl p-3 mb-4 text-xs flex flex-wrap items-center justify-between gap-2">
-          <span id="quotaStatsText" class="text-slate-300">Ładowanie statystyk...</span>
-          <span class="text-slate-400">Luki zostaną uzupełnione trasami <strong class="text-blue-400">Auto</strong>.</span>
         </div>
 
         <div class="overflow-x-auto">
@@ -366,9 +355,9 @@
               <tr class="bg-slate-900 text-slate-300 border-b border-slate-700 uppercase text-[11px]">
                 <th class="py-2.5 px-3">Lokalizacja</th>
                 <th class="py-2.5 px-3 text-right">Dystans bazowy</th>
-                <th class="py-2.5 px-3">Tryb / Krotność</th>
+                <th class="py-2.5 px-3">Tryb</th>
                 <th class="py-2.5 px-3">Ilość</th>
-                <th class="py-2.5 px-3">Pojazd</th>
+                <th class="py-2.5 px-3">Dla auta</th>
               </tr>
             </thead>
             <tbody id="quotasTableBody" class="divide-y divide-slate-700/60"></tbody>
@@ -380,7 +369,7 @@
     <!-- ZAKŁADKA 4: POJAZDY -->
     <div id="tab-vehicles" class="tab-content hidden space-y-5 no-print">
       <div class="bg-slate-800 rounded-2xl border border-slate-700 p-5 shadow-xl">
-        <h2 class="text-sm font-bold text-blue-400 uppercase tracking-wider mb-1">Baza Samochodów</h2>
+        <h2 class="text-sm font-bold text-blue-400 uppercase tracking-wider mb-3">Baza Samochodów</h2>
         <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700 mb-5">
           <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
             <input type="text" id="newVehName" placeholder="Marka i model">
@@ -410,7 +399,7 @@
     <!-- ZAKŁADKA 5: KIEROWCY -->
     <div id="tab-drivers" class="tab-content hidden space-y-5 no-print">
       <div class="bg-slate-800 rounded-2xl border border-slate-700 p-5 shadow-xl">
-        <h2 class="text-sm font-bold text-blue-400 uppercase tracking-wider mb-1">Baza Kierowców</h2>
+        <h2 class="text-sm font-bold text-blue-400 uppercase tracking-wider mb-3">Baza Kierowców</h2>
         <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700 mb-5">
           <div class="flex flex-col sm:flex-row gap-3">
             <input type="text" id="newDriverName" placeholder="Imię i nazwisko..." class="flex-1">
@@ -435,40 +424,25 @@
     <!-- ZAKŁADKA 6: KALENDARZ -->
     <div id="tab-calendar" class="tab-content hidden space-y-5 no-print">
       <div class="bg-slate-800 rounded-2xl border border-slate-700 p-5 shadow-xl">
-        <h2 class="text-sm font-bold text-blue-400 uppercase tracking-wider mb-1">Kalendarz i Dni Robocze</h2>
-        <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700 mb-5">
-          <div class="text-xs font-semibold text-slate-300 uppercase mb-2.5">Aktywne dni tygodnia:</div>
-          <div class="flex flex-wrap gap-2 mb-4">
-            <button type="button" onclick="toggleDayOfWeek(1)" id="dow-1" class="px-3.5 py-2 rounded-lg text-xs font-bold bg-blue-600 text-white border border-blue-500">Pon</button>
-            <button type="button" onclick="toggleDayOfWeek(2)" id="dow-2" class="px-3.5 py-2 rounded-lg text-xs font-bold bg-blue-600 text-white border border-blue-500">Wt</button>
-            <button type="button" onclick="toggleDayOfWeek(3)" id="dow-3" class="px-3.5 py-2 rounded-lg text-xs font-bold bg-blue-600 text-white border border-blue-500">Śr</button>
-            <button type="button" onclick="toggleDayOfWeek(4)" id="dow-4" class="px-3.5 py-2 rounded-lg text-xs font-bold bg-blue-600 text-white border border-blue-500">Czw</button>
-            <button type="button" onclick="toggleDayOfWeek(5)" id="dow-5" class="px-3.5 py-2 rounded-lg text-xs font-bold bg-blue-600 text-white border border-blue-500">Pt</button>
-            <button type="button" onclick="toggleDayOfWeek(6)" id="dow-6" class="px-3.5 py-2 rounded-lg text-xs font-bold bg-slate-800 text-slate-400 border border-slate-700">Sob</button>
-            <button type="button" onclick="toggleDayOfWeek(0)" id="dow-0" class="px-3.5 py-2 rounded-lg text-xs font-bold bg-slate-800 text-slate-400 border border-slate-700">Niedz</button>
-          </div>
-          <div class="flex flex-wrap gap-2">
-            <button type="button" onclick="excludePolishHolidays()" class="bg-slate-800 hover:bg-slate-700 text-xs text-amber-300 border border-amber-500/40 px-3.5 py-2 rounded-lg transition">Wyłącz Święta PL</button>
-            <button type="button" onclick="clearManualExclusions()" class="bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 border border-slate-600 px-3.5 py-2 rounded-lg transition">Reset wyłączeń</button>
-          </div>
+        <h2 class="text-sm font-bold text-blue-400 uppercase tracking-wider mb-2">Kalendarz i Dni Robocze</h2>
+        <p class="text-xs text-slate-400 mb-4">Soboty i niedziele są fabrycznie wyłączone.</p>
+        <div class="flex flex-wrap gap-2 mb-4">
+          <button type="button" onclick="toggleDayOfWeek(1)" id="dow-1" class="px-3.5 py-2 rounded-lg text-xs font-bold bg-blue-600 text-white">Pon</button>
+          <button type="button" onclick="toggleDayOfWeek(2)" id="dow-2" class="px-3.5 py-2 rounded-lg text-xs font-bold bg-blue-600 text-white">Wt</button>
+          <button type="button" onclick="toggleDayOfWeek(3)" id="dow-3" class="px-3.5 py-2 rounded-lg text-xs font-bold bg-blue-600 text-white">Śr</button>
+          <button type="button" onclick="toggleDayOfWeek(4)" id="dow-4" class="px-3.5 py-2 rounded-lg text-xs font-bold bg-blue-600 text-white">Czw</button>
+          <button type="button" onclick="toggleDayOfWeek(5)" id="dow-5" class="px-3.5 py-2 rounded-lg text-xs font-bold bg-blue-600 text-white">Pt</button>
+          <button type="button" onclick="toggleDayOfWeek(6)" id="dow-6" class="px-3.5 py-2 rounded-lg text-xs font-bold bg-slate-800 text-slate-400">Sob</button>
+          <button type="button" onclick="toggleDayOfWeek(0)" id="dow-0" class="px-3.5 py-2 rounded-lg text-xs font-bold bg-slate-800 text-slate-400">Niedz</button>
         </div>
-        <div>
-          <div class="flex justify-between items-center mb-2">
-            <h3 class="text-xs font-semibold text-slate-300 uppercase">Siatka dni:</h3>
-            <span id="activeDaysCount" class="text-xs text-emerald-400 font-bold">0 dni</span>
-          </div>
-          <div id="calendarGrid" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-2 max-h-96 overflow-y-auto p-2.5 bg-slate-900/60 rounded-xl border border-slate-700"></div>
-        </div>
+        <div id="calendarGrid" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-2 max-h-96 overflow-y-auto p-2 bg-slate-900/60 rounded-xl border border-slate-700"></div>
       </div>
     </div>
 
     <!-- ZAKŁADKA 7: TRASY -->
     <div id="tab-routes" class="tab-content hidden space-y-5 no-print">
       <div class="bg-slate-800 rounded-2xl border border-slate-700 p-5 shadow-xl">
-        <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
-          <h2 class="text-sm font-bold text-blue-400 uppercase tracking-wider">Baza Lokalizacji RCKiK</h2>
-          <button type="button" onclick="resetDefaultRoutes()" class="text-xs bg-slate-700 hover:bg-slate-600 text-slate-200 px-3 py-1.5 rounded-lg">Przywróć domyślne</button>
-        </div>
+        <h2 class="text-sm font-bold text-blue-400 uppercase tracking-wider mb-2">Baza Lokalizacji RCKiK</h2>
         <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700 mb-5">
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <input type="text" id="newRouteName" placeholder="Nazwa lokalizacji">
@@ -482,7 +456,7 @@
               <tr class="bg-slate-900 text-slate-400 border-b border-slate-700">
                 <th class="py-2.5 px-3">Lp.</th>
                 <th class="py-2.5 px-3">Lokalizacja</th>
-                <th class="py-2.5 px-3 text-right">1 strona</th>
+                <th class="py-2.5 px-3 text-right">W 1 stronę</th>
                 <th class="py-2.5 px-3 text-right">Tam i z powrotem</th>
                 <th class="py-2.5 px-3 text-right">Usuń</th>
               </tr>
@@ -506,20 +480,6 @@
         lastDay: `${yyyy}-${mm}-${String(lastDayNum).padStart(2, '0')}`
       };
     }
-
-    const safeStorage = {
-      get: function(key, fallback) {
-        try {
-          const item = window.localStorage.getItem(key);
-          if (!item) return fallback;
-          const parsed = JSON.parse(item);
-          return (Array.isArray(parsed) && parsed.length === 0) ? fallback : parsed;
-        } catch (err) { return fallback; }
-      },
-      set: function(key, value) {
-        try { window.localStorage.setItem(key, JSON.stringify(value)); } catch (err) {}
-      }
-    };
 
     const monthBounds = getCurrentMonthBounds();
 
@@ -553,37 +513,128 @@
       { id: 15, name: "rckik Siedlce + Garwolin", km: 145, mode: "auto", count: 2, assignTo: "ALL" }
     ];
 
+    // ==========================================
+    // STAN I BEZPIECZNA SYNCHRONIZACJA W CHMURZE
+    // ==========================================
+    const safeStorage = {
+      get: function(key, fallback) {
+        try {
+          const item = window.localStorage.getItem(key);
+          if (!item) return fallback;
+          const parsed = JSON.parse(item);
+          return (Array.isArray(parsed) && parsed.length === 0) ? fallback : parsed;
+        } catch (err) { return fallback; }
+      },
+      set: function(key, value) {
+        try { window.localStorage.setItem(key, JSON.stringify(value)); } catch (err) {}
+      }
+    };
+
+    let cloudConfig = safeStorage.get("ak_cloud_cfg", { key: "", bin: "" });
+
     let state = {
-      vehicles: safeStorage.get("ak_vehicles_v10", JSON.parse(JSON.stringify(DEFAULT_VEHICLES))),
-      drivers: safeStorage.get("ak_drivers_v10", JSON.parse(JSON.stringify(DEFAULT_DRIVERS))),
-      routes: safeStorage.get("ak_routes_v10", JSON.parse(JSON.stringify(DEFAULT_ROUTES))),
-      manualEntries: safeStorage.get("ak_manual_v10", []),
+      vehicles: safeStorage.get("ak_vehicles_v11", JSON.parse(JSON.stringify(DEFAULT_VEHICLES))),
+      drivers: safeStorage.get("ak_drivers_v11", JSON.parse(JSON.stringify(DEFAULT_DRIVERS))),
+      routes: safeStorage.get("ak_routes_v11", JSON.parse(JSON.stringify(DEFAULT_ROUTES))),
+      manualEntries: safeStorage.get("ak_manual_v11", []),
       activeDaysOfWeek: [1, 2, 3, 4, 5],
       excludedDates: new Set(),
       generatedRows: [],
       resultsFilterVehicleId: "ALL"
     };
 
-    state.vehicles.forEach(v => {
-      if (typeof v.selected === "undefined") v.selected = true;
-      if (typeof v.startOdo === "undefined") v.startOdo = 120000;
-      if (typeof v.targetKm === "undefined") v.targetKm = 3000;
-      if (typeof v.endOdo === "undefined") v.endOdo = v.startOdo + v.targetKm;
-      if (!v.dateFrom) v.dateFrom = monthBounds.firstDay;
-      if (!v.dateTo) v.dateTo = monthBounds.lastDay;
-    });
-    state.routes.forEach(r => {
-      if (!r.mode) r.mode = "auto";
-      if (typeof r.count === "undefined") r.count = 1;
-      if (!r.assignTo) r.assignTo = "ALL";
-    });
-
     function saveState() {
-      safeStorage.set("ak_vehicles_v10", state.vehicles);
-      safeStorage.set("ak_drivers_v10", state.drivers);
-      safeStorage.set("ak_routes_v10", state.routes);
-      safeStorage.set("ak_manual_v10", state.manualEntries);
+      safeStorage.set("ak_vehicles_v11", state.vehicles);
+      safeStorage.set("ak_drivers_v11", state.drivers);
+      safeStorage.set("ak_routes_v11", state.routes);
+      safeStorage.set("ak_manual_v11", state.manualEntries);
       updateBadges();
+      triggerCloudAutosave();
+    }
+
+    // AUTOZAPIS DO CHMURY W TLE
+    let cloudTimer = null;
+    function triggerCloudAutosave() {
+      if (!cloudConfig.key || !cloudConfig.bin) return;
+      clearTimeout(cloudTimer);
+      const badge = document.getElementById("cloudStatusBadge");
+      if (badge) badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400 animate-spin"></span> Zapisywanie w chmurze...`;
+
+      cloudTimer = setTimeout(async () => {
+        try {
+          const payload = {
+            vehicles: state.vehicles,
+            drivers: state.drivers,
+            routes: state.routes,
+            manualEntries: state.manualEntries,
+            updatedAt: new Date().toISOString()
+          };
+          const res = await fetch(`https://api.jsonbin.io/v3/b/${cloudConfig.bin}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Master-Key': cloudConfig.key
+            },
+            body: JSON.stringify(payload)
+          });
+          if (res.ok) {
+            if (badge) badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400"></span> Chmura zsynchronizowana`;
+          }
+        } catch (e) {
+          if (badge) badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-rose-400"></span> Błąd synchronizacji`;
+        }
+      }, 1200);
+    }
+
+    async function manualCloudSync() {
+      if (!cloudConfig.key || !cloudConfig.bin) {
+        toggleCloudConfigModal();
+        return;
+      }
+      const badge = document.getElementById("cloudStatusBadge");
+      if (badge) badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400 animate-spin"></span> Pobieranie z chmury...`;
+      try {
+        const res = await fetch(`https://api.jsonbin.io/v3/b/${cloudConfig.bin}/latest`, {
+          headers: { 'X-Master-Key': cloudConfig.key }
+        });
+        if (res.ok) {
+          const json = await res.json();
+          const d = json.record;
+          if (d.vehicles) state.vehicles = d.vehicles;
+          if (d.drivers) state.drivers = d.drivers;
+          if (d.routes) state.routes = d.routes;
+          if (d.manualEntries) state.manualEntries = d.manualEntries;
+          safeStorage.set("ak_vehicles_v11", state.vehicles);
+          safeStorage.set("ak_drivers_v11", state.drivers);
+          safeStorage.set("ak_routes_v11", state.routes);
+          safeStorage.set("ak_manual_v11", state.manualEntries);
+
+          renderManualJournal();
+          renderVehicles();
+          renderQuotasTable();
+          renderDrivers();
+          renderRoutes();
+          renderCalendarGrid();
+          if (badge) badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400"></span> Pomyślnie pobrano z chmury!`;
+        }
+      } catch (err) {
+        alert("Nie udało się pobrać danych z chmury.");
+      }
+    }
+
+    function toggleCloudConfigModal() {
+      const m = document.getElementById("cloudModal");
+      m.classList.toggle("hidden");
+      document.getElementById("cfgCloudKey").value = cloudConfig.key || "";
+      document.getElementById("cfgCloudBin").value = cloudConfig.bin || "";
+    }
+
+    function saveCloudConfig() {
+      cloudConfig.key = document.getElementById("cfgCloudKey").value.trim();
+      cloudConfig.bin = document.getElementById("cfgCloudBin").value.trim();
+      safeStorage.set("ak_cloud_cfg", cloudConfig);
+      toggleCloudConfigModal();
+      manualCloudSync();
     }
 
     function updateBadges() {
@@ -593,10 +644,7 @@
     }
 
     window.addEventListener("DOMContentLoaded", function() {
-      document.getElementById("globalDateFrom").value = monthBounds.firstDay;
-      document.getElementById("globalDateTo").value = monthBounds.lastDay;
       document.getElementById("manualDate").value = monthBounds.firstDay;
-
       renderManualJournal();
       renderVehicles();
       renderQuotasTable();
@@ -604,6 +652,9 @@
       renderRoutes();
       renderCalendarGrid();
       updateBadges();
+      if (cloudConfig.key && cloudConfig.bin) {
+        manualCloudSync();
+      }
     });
 
     function switchTab(tabId) {
@@ -626,25 +677,8 @@
       renderCalendarGrid();
     }
 
-    function resetAllToDefaults() {
-      if (confirm("Zresetować aplikację do stanu początkowego?")) {
-        state.vehicles = JSON.parse(JSON.stringify(DEFAULT_VEHICLES));
-        state.drivers = JSON.parse(JSON.stringify(DEFAULT_DRIVERS));
-        state.routes = JSON.parse(JSON.stringify(DEFAULT_ROUTES));
-        state.manualEntries = [];
-        state.excludedDates.clear();
-        saveState();
-        renderManualJournal();
-        renderVehicles();
-        renderQuotasTable();
-        renderDrivers();
-        renderRoutes();
-        renderCalendarGrid();
-      }
-    }
-
     // =========================================================================
-    // OBSŁUGA DZIENNIKA RZECZYWISTEGO (DRZEWKO + LICZNIKI OD-DO)
+    // DZIENNIK: NATYCHMIASTOWE DODAWANIE BEZ ODŚWIEŻANIA
     // =========================================================================
     function renderManualJournal() {
       const vehSelect = document.getElementById("manualVehicle");
@@ -676,7 +710,6 @@
       if (treeContainer) {
         const existingChecked = new Set();
         treeContainer.querySelectorAll('input[type="checkbox"]:checked').forEach(cb => existingChecked.add(cb.value));
-
         treeContainer.innerHTML = "";
         state.routes.forEach(r => {
           const isChecked = existingChecked.has(String(r.id));
@@ -700,7 +733,7 @@
 
       if (state.manualEntries.length === 0) {
         const tr = document.createElement("tr");
-        tr.innerHTML = `<td colspan="7" class="py-4 text-center text-slate-500 italic">Brak wpisów w dzienniku. Zaznacz lokalizacje w drzewku lub wpisz stany licznika i dodaj wyjazd.</td>`;
+        tr.innerHTML = `<td colspan="7" class="py-4 text-center text-slate-500 italic">Brak wpisów w dzienniku. Zaznacz lokalizacje w drzewku lub wpisz stany licznika i kliknij Dodaj.</td>`;
         tbody.appendChild(tr);
         return;
       }
@@ -716,7 +749,7 @@
           <td class="py-2.5 px-3 font-mono font-semibold text-white">${entry.date}</td>
           <td class="py-2.5 px-3 text-blue-300">${vLabel}</td>
           <td class="py-2.5 px-3 text-amber-300">${entry.driverName}</td>
-          <td class="py-2.5 px-3 font-medium">${entry.route || 'Trasa wg licznika'}</td>
+          <td class="py-2.5 px-3 font-medium">${entry.route || 'Trasa manualna'}</td>
           <td class="py-2.5 px-3 text-right font-mono text-slate-300">${odoText}</td>
           <td class="py-2.5 px-3 text-right font-mono font-bold text-emerald-400">${entry.km} km</td>
           <td class="py-2.5 px-3 text-right whitespace-nowrap">
@@ -747,7 +780,6 @@
         if (rObj) totalKm += (rObj.km * 2);
       });
       document.getElementById("treeSelectedKmSum").textContent = `Zaznaczono km: ${totalKm}`;
-      
       const customDistInput = document.getElementById("manualDistCustom");
       if (!customDistInput.value || customDistInput.dataset.fromTree === "true" || customDistInput.value === "0") {
         customDistInput.value = totalKm > 0 ? totalKm : "";
@@ -782,7 +814,7 @@
 
       if (distVal <= 0 && treeKm > 0) distVal = treeKm;
       if (distVal <= 0 && odoStartVal && odoEndVal && odoEndVal >= odoStartVal) distVal = odoEndVal - odoStartVal;
-      if (distVal <= 0) return alert("Zaznacz lokalizacje w drzewku lub wpisz przejechany dystans / stany licznika!");
+      if (distVal <= 0) return alert("Zaznacz lokalizacje w drzewku lub wpisz dystans!");
 
       const routeStr = routeNames.length > 0 ? routeNames.join(" + ") : "Trasa użytkownika";
 
@@ -812,7 +844,9 @@
       }
 
       saveState();
-      renderManualJournal();
+      renderManualJournal(); // Natychmiastowe odświeżenie tabeli
+
+      // Reset formularza
       if (treeContainer) {
         treeContainer.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
       }
@@ -825,7 +859,6 @@
     function editManualEntry(id) {
       const entry = state.manualEntries.find(e => e.id === id);
       if (!entry) return;
-
       document.getElementById("manualDate").value = entry.date;
       document.getElementById("manualVehicle").value = entry.vehicleId;
       document.getElementById("manualDriver").value = entry.driverName;
@@ -843,7 +876,6 @@
         });
       }
       calcTreeKm();
-
       document.getElementById("cancelEditBtn").classList.remove("hidden");
       document.getElementById("saveManualBtn").textContent = "Zapisz zmiany";
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -870,7 +902,7 @@
     }
 
     // =========================================================================
-    // OBSŁUGA DAT I KALENDARZA
+    // MODUŁY POJAZDÓW, KALENDARZA, GENERATORA
     // =========================================================================
     function parseLocalIso(isoStr) {
       if (!isoStr) return new Date();
@@ -911,20 +943,11 @@
       const list = selected.length > 0 ? selected : state.vehicles;
       let minFrom = list[0]?.dateFrom || monthBounds.firstDay;
       let maxTo = list[0]?.dateTo || monthBounds.lastDay;
-
       list.forEach(v => {
         if (v.dateFrom && v.dateFrom < minFrom) minFrom = v.dateFrom;
         if (v.dateTo && v.dateTo > maxTo) maxTo = v.dateTo;
       });
       return { minFrom, maxTo };
-    }
-
-    function applyGlobalDatesToAllVehicles() {
-      const gFrom = document.getElementById("globalDateFrom").value;
-      const gTo = document.getElementById("globalDateTo").value;
-      if (!gFrom || !gTo || gFrom > gTo) return alert("Wybierz poprawny zakres dat.");
-      state.vehicles.forEach(v => { v.dateFrom = gFrom; v.dateTo = gTo; });
-      saveState(); renderVehicles(); renderCalendarGrid();
     }
 
     function toggleVehicleSelection(id) {
@@ -950,7 +973,6 @@
       const v = state.vehicles.find(x => x.id == vehId);
       if (!v) return;
       const num = parseInt(value, 10) || 0;
-
       if (field === 'start') {
         v.startOdo = num;
         if (v.endOdo >= v.startOdo) v.targetKm = v.endOdo - v.startOdo;
@@ -1047,24 +1069,20 @@
     }
 
     function addVehicle() {
-      const nameEl = document.getElementById("newVehName");
-      const plateEl = document.getElementById("newVehPlate");
-      const odoEl = document.getElementById("newVehOdo");
-      const name = nameEl.value.trim(), plate = plateEl.value.trim().toUpperCase();
-      const startOdo = parseInt(odoEl.value, 10) || 100000;
+      const name = document.getElementById("newVehName").value.trim();
+      const plate = document.getElementById("newVehPlate").value.trim().toUpperCase();
+      const startOdo = parseInt(document.getElementById("newVehOdo").value, 10) || 100000;
       if (!name || !plate) return alert("Wpisz markę i nr rej.");
       state.vehicles.push({
         id: Date.now(), name, plate, selected: true, startOdo, endOdo: startOdo + 2500, targetKm: 2500,
         dateFrom: monthBounds.firstDay, dateTo: monthBounds.lastDay
       });
       saveState(); renderVehicles(); renderQuotasTable(); renderCalendarGrid();
-      nameEl.value = ""; plateEl.value = ""; odoEl.value = "";
     }
 
     function deleteVehicle(id) {
       if (state.vehicles.length <= 1) return alert("Musi pozostać min. 1 auto.");
       state.vehicles = state.vehicles.filter(v => v.id !== id);
-      state.routes.forEach(r => { if (r.assignTo == id) r.assignTo = "ALL"; });
       saveState(); renderVehicles(); renderQuotasTable(); renderCalendarGrid();
     }
 
@@ -1080,8 +1098,8 @@
       const r = state.routes.find(x => x.id === routeId);
       if (!r) return;
       const num = parseInt(val, 10);
-      if (isNaN(num) || num <= 0) { r.mode = 'off'; r.count = 0; }
-      else { r.mode = 'fixed'; r.count = num; }
+      r.mode = (isNaN(num) || num <= 0) ? 'off' : 'fixed';
+      r.count = isNaN(num) ? 0 : num;
       saveState(); renderQuotasTable();
     }
 
@@ -1103,17 +1121,10 @@
     function renderQuotasTable() {
       const tbody = document.getElementById("quotasTableBody");
       if (!tbody) return;
-      const isRoundTrip = document.getElementById("optRoundTrip") ? document.getElementById("optRoundTrip").checked : true;
-      const mult = isRoundTrip ? 2 : 1;
-
+      const mult = document.getElementById("optRoundTrip").checked ? 2 : 1;
       tbody.innerHTML = "";
-      let fixedTripsCount = 0, fixedKmSum = 0, autoRoutesCount = 0;
-
       state.routes.forEach(r => {
         const baseDist = r.km * mult;
-        if (r.mode === 'fixed' && r.count > 0) { fixedTripsCount += r.count; fixedKmSum += baseDist * r.count; }
-        else if (r.mode === 'auto') { autoRoutesCount++; }
-
         const vehicleOptions = [
           `<option value="ALL" ${r.assignTo === 'ALL' ? 'selected' : ''}>Wszystkie auta (Wspólnie)</option>`,
           ...state.vehicles.map(v => `<option value="${v.id}" ${String(r.assignTo) === String(v.id) ? 'selected' : ''}>Tylko: ${v.name} [${v.plate}]</option>`)
@@ -1130,11 +1141,11 @@
           <td class="py-2.5 px-3 text-right font-mono text-slate-300">${baseDist} km</td>
           <td class="py-2.5 px-3">
             <div class="flex flex-wrap gap-1">
-              <button type="button" onclick="setRouteQuotaMode(${r.id}, 'off', 0)" class="px-2 py-1 rounded text-[11px] font-bold border ${isOff ? 'bg-rose-600 text-white border-rose-500' : 'bg-slate-900 text-slate-400 border-slate-700'}">0</button>
-              <button type="button" onclick="setRouteQuotaMode(${r.id}, 'fixed', 1)" class="px-2 py-1 rounded text-[11px] font-bold border ${isFixed && r.count === 1 ? 'bg-amber-500 text-slate-950 border-amber-400' : 'bg-slate-900 text-slate-300 border-slate-700'}">1x</button>
-              <button type="button" onclick="setRouteQuotaMode(${r.id}, 'fixed', 2)" class="px-2 py-1 rounded text-[11px] font-bold border ${isFixed && r.count === 2 ? 'bg-amber-500 text-slate-950 border-amber-400' : 'bg-slate-900 text-slate-300 border-slate-700'}">2x</button>
-              <button type="button" onclick="setRouteQuotaMode(${r.id}, 'fixed', 5)" class="px-2 py-1 rounded text-[11px] font-bold border ${isFixed && r.count === 5 ? 'bg-amber-500 text-slate-950 border-amber-400' : 'bg-slate-900 text-slate-300 border-slate-700'}">5x</button>
-              <button type="button" onclick="setRouteQuotaMode(${r.id}, 'auto')" class="px-2.5 py-1 rounded text-[11px] font-bold border ${isAuto ? 'bg-blue-600 text-white border-blue-500' : 'bg-slate-900 text-slate-300 border-slate-700'}">Auto</button>
+              <button type="button" onclick="setRouteQuotaMode(${r.id}, 'off', 0)" class="px-2 py-1 rounded text-[11px] font-bold border ${isOff ? 'bg-rose-600 text-white' : 'bg-slate-900 text-slate-400'}">0</button>
+              <button type="button" onclick="setRouteQuotaMode(${r.id}, 'fixed', 1)" class="px-2 py-1 rounded text-[11px] font-bold border ${isFixed && r.count === 1 ? 'bg-amber-500 text-slate-950' : 'bg-slate-900 text-slate-300'}">1x</button>
+              <button type="button" onclick="setRouteQuotaMode(${r.id}, 'fixed', 2)" class="px-2 py-1 rounded text-[11px] font-bold border ${isFixed && r.count === 2 ? 'bg-amber-500 text-slate-950' : 'bg-slate-900 text-slate-300'}">2x</button>
+              <button type="button" onclick="setRouteQuotaMode(${r.id}, 'fixed', 5)" class="px-2 py-1 rounded text-[11px] font-bold border ${isFixed && r.count === 5 ? 'bg-amber-500 text-slate-950' : 'bg-slate-900 text-slate-300'}">5x</button>
+              <button type="button" onclick="setRouteQuotaMode(${r.id}, 'auto')" class="px-2.5 py-1 rounded text-[11px] font-bold border ${isAuto ? 'bg-blue-600 text-white' : 'bg-slate-900 text-slate-300'}">Auto</button>
             </div>
           </td>
           <td class="py-2.5 px-3">
@@ -1144,11 +1155,6 @@
         `;
         tbody.appendChild(tr);
       });
-
-      const statsEl = document.getElementById("quotaStatsText");
-      if (statsEl) {
-        statsEl.innerHTML = `Sztywne: <strong class="text-amber-400">${fixedTripsCount} wyjazdów (${fixedKmSum} km)</strong> | Elastyczne (Auto): <strong class="text-blue-400">${autoRoutesCount} tras</strong>`;
-      }
       updateBadges();
     }
 
@@ -1170,11 +1176,10 @@
     }
 
     function addDriver() {
-      const el = document.getElementById("newDriverName");
-      const name = el.value.trim();
+      const name = document.getElementById("newDriverName").value.trim();
       if (!name) return alert("Podaj imię.");
       state.drivers.push({ id: Date.now(), name, active: true });
-      saveState(); renderDrivers(); el.value = "";
+      saveState(); renderDrivers(); document.getElementById("newDriverName").value = "";
     }
 
     function toggleDriver(id) {
@@ -1191,17 +1196,10 @@
 
     function toggleDayOfWeek(dow) {
       const idx = state.activeDaysOfWeek.indexOf(dow);
-      const dayLabels = ["Niedziela", "Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek", "Sobota"];
+      if (idx > -1) state.activeDaysOfWeek.splice(idx, 1);
+      else state.activeDaysOfWeek.push(dow);
       const btn = document.getElementById(`dow-${dow}`);
-      if (idx > -1) {
-        state.activeDaysOfWeek.splice(idx, 1);
-        btn.className = "px-3.5 py-2 rounded-lg text-xs font-bold bg-slate-800 text-slate-400 border border-slate-700";
-        btn.textContent = `${dayLabels[dow].slice(0, 3)} (Wył.)`;
-      } else {
-        state.activeDaysOfWeek.push(dow);
-        btn.className = "px-3.5 py-2 rounded-lg text-xs font-bold bg-blue-600 text-white border border-blue-500";
-        btn.textContent = dayLabels[dow].slice(0, 3);
-      }
+      btn.className = state.activeDaysOfWeek.includes(dow) ? "px-3.5 py-2 rounded-lg text-xs font-bold bg-blue-600 text-white" : "px-3.5 py-2 rounded-lg text-xs font-bold bg-slate-800 text-slate-400";
       renderVehicles(); renderCalendarGrid();
     }
 
@@ -1211,55 +1209,23 @@
       const grid = document.getElementById("calendarGrid");
       if (!grid) return;
       grid.innerHTML = "";
-
-      let activeCount = 0;
       const dayNames = ["Ndz", "Pon", "Wt", "Śr", "Czw", "Pt", "Sob"];
-      const selectedVehicles = state.vehicles.filter(v => v.selected);
 
       dates.forEach(d => {
         const iso = formatIso(d);
         const dow = d.getDay();
-        const isDowActive = state.activeDaysOfWeek.includes(dow);
-        const isManuallyExcluded = state.excludedDates.has(iso);
-        const isActive = isDowActive && !isManuallyExcluded;
-
-        if (isActive) activeCount++;
-        const activeCarsOnDay = selectedVehicles.filter(v => iso >= v.dateFrom && iso <= v.dateTo);
-        const carsBadge = activeCarsOnDay.length > 0 ? activeCarsOnDay.map(v => v.plate.split(' ')[1] || v.name.slice(0, 4)).join(', ') : 'Brak';
-
+        const isActive = state.activeDaysOfWeek.includes(dow) && !state.excludedDates.has(iso);
         const div = document.createElement("div");
         div.className = `p-2 rounded-lg border text-center cursor-pointer select-none transition ${isActive ? 'bg-blue-900/30 border-blue-500/50 text-blue-100 hover:bg-blue-800/40' : 'bg-slate-900 border-slate-800 text-slate-500 line-through'}`;
-        div.innerHTML = `
-          <div class="text-[10px] uppercase font-semibold">${dayNames[dow]}</div>
-          <div class="text-xs font-bold">${iso.slice(5)}</div>
-          <div class="text-[9px] mt-0.5 text-slate-400 truncate">${isActive ? carsBadge : 'Wolny'}</div>
-        `;
+        div.innerHTML = `<div class="text-[10px] uppercase font-semibold">${dayNames[dow]}</div><div class="text-xs font-bold">${iso.slice(5)}</div>`;
         div.onclick = () => {
-          if (!isDowActive) return;
+          if (!state.activeDaysOfWeek.includes(dow)) return;
           if (state.excludedDates.has(iso)) state.excludedDates.delete(iso);
           else state.excludedDates.add(iso);
           renderVehicles(); renderCalendarGrid();
         };
         grid.appendChild(div);
       });
-
-      document.getElementById("activeDaysCount").textContent = `${activeCount} aktywnych dni`;
-    }
-
-    function excludePolishHolidays() {
-      const { minFrom, maxTo } = getGlobalCalendarSpan();
-      getDatesInRange(minFrom, maxTo).forEach(d => {
-        const m = d.getMonth() + 1, day = d.getDate();
-        if ((m === 1 && (day === 1 || day === 6)) || (m === 5 && (day === 1 || day === 3)) || (m === 8 && day === 15) || (m === 11 && (day === 1 || day === 11)) || (m === 12 && (day === 24 || day === 25 || day === 26))) {
-          state.excludedDates.add(formatIso(d));
-        }
-      });
-      renderVehicles(); renderCalendarGrid();
-    }
-
-    function clearManualExclusions() {
-      state.excludedDates.clear();
-      renderVehicles(); renderCalendarGrid();
     }
 
     function renderRoutes() {
@@ -1267,14 +1233,13 @@
       if (!tbody) return;
       tbody.innerHTML = "";
       state.routes.forEach((r, idx) => {
-        const roundTrip = r.km * 2;
         const tr = document.createElement("tr");
         tr.className = "hover:bg-slate-700/30";
         tr.innerHTML = `
           <td class="py-2.5 px-3 text-slate-400 font-mono">${idx + 1}</td>
           <td class="py-2.5 px-3 font-semibold text-white">${r.name}</td>
           <td class="py-2.5 px-3 text-right font-mono text-slate-300">${r.km} km</td>
-          <td class="py-2.5 px-3 text-right font-mono text-blue-300 font-semibold">${roundTrip} km</td>
+          <td class="py-2.5 px-3 text-right font-mono text-blue-300 font-semibold">${r.km * 2} km</td>
           <td class="py-2.5 px-3 text-right"><button type="button" onclick="deleteRoute(${r.id})" class="text-rose-400 hover:text-rose-300 px-2 py-1">Usuń</button></td>
         `;
         tbody.appendChild(tr);
@@ -1284,26 +1249,19 @@
     }
 
     function addRoute() {
-      const nameEl = document.getElementById("newRouteName");
-      const kmEl = document.getElementById("newRouteKm");
-      const name = nameEl.value.trim(), km = parseFloat(kmEl.value);
+      const name = document.getElementById("newRouteName").value.trim();
+      const km = parseFloat(document.getElementById("newRouteKm").value);
       if (!name || isNaN(km) || km <= 0) return alert("Podaj nazwę i dystans.");
       state.routes.push({ id: Date.now(), name, km: Math.round(km), mode: "auto", count: 1, assignTo: "ALL" });
       saveState(); renderRoutes(); renderQuotasTable();
-      nameEl.value = ""; kmEl.value = "";
+      document.getElementById("newRouteName").value = "";
+      document.getElementById("newRouteKm").value = "";
     }
 
     function deleteRoute(id) {
       if (state.routes.length <= 1) return alert("Musi pozostać min. 1 trasa.");
       state.routes = state.routes.filter(r => r.id !== id);
       saveState(); renderRoutes(); renderQuotasTable();
-    }
-
-    function resetDefaultRoutes() {
-      if (confirm("Przywrócić domyślne trasy?")) {
-        state.routes = JSON.parse(JSON.stringify(DEFAULT_ROUTES));
-        saveState(); renderRoutes(); renderQuotasTable();
-      }
     }
 
     function createTripInstance(routeObj, mult, useRandomSpread) {
@@ -1315,7 +1273,7 @@
     }
 
     // =========================================================================
-    // HYBRYDOWY GENERATOR Z SEGMENTOWANIEM LICZNIKÓW I LUK
+    // HYBRYDOWY GENERATOR Z DOPASOWYWANIEM LUK DO LICZNIKÓW
     // =========================================================================
     function generateMultiSchedule() {
       const selectedVehicles = state.vehicles.filter(v => v.selected);
@@ -1335,52 +1293,23 @@
         const vActiveDates = getActiveDatesForVehicle(v).map(d => formatIso(d));
         if (vActiveDates.length === 0) return alert(`Samochód ${v.name} nie ma aktywnych dni roboczych.`);
 
-        // Pobierz i posortuj wpisy z dziennika dla tego auta
         const carManualEntries = state.manualEntries
           .filter(m => m.vehicleId == v.id && vActiveDates.includes(m.date))
           .sort((a, b) => a.date.localeCompare(b.date));
 
-        // Zbuduj punkty kontrolne (checkpoints): Start okresu -> Wpisy manualne -> Koniec okresu
-        const checkpoints = [];
-        checkpoints.push({
-          date: v.dateFrom,
-          odo: parseInt(v.startOdo, 10),
-          isStart: true
-        });
-
-        carManualEntries.forEach(m => {
-          checkpoints.push({
-            date: m.date,
-            manualEntry: m,
-            isManual: true
-          });
-        });
-
-        checkpoints.push({
-          date: v.dateTo,
-          odo: parseInt(v.endOdo, 10),
-          isEnd: true
-        });
-
-        // Wypełnij braki kilometrów pomiędzy punktami
-        let currentCarTrips = [];
         const manualDatesSet = new Set(carManualEntries.map(m => m.date));
         const gapDates = vActiveDates.filter(d => !manualDatesSet.has(d));
 
-        // Oblicz łączny dystans ręczny
         const totalManualKm = carManualEntries.reduce((s, m) => s + m.km, 0);
         let neededGapKm = v.targetKm - totalManualKm;
 
         let autoPool = state.routes.filter(r => r.mode === 'auto' && (r.assignTo === 'ALL' || String(r.assignTo) === String(v.id)));
         if (autoPool.length === 0) autoPool = state.routes;
 
-        // Dobierz z puli trasy sztywne
         let gapTrips = [];
         const fixedRoutes = state.routes.filter(r => r.mode === 'fixed' && r.count > 0 && (r.assignTo === 'ALL' || String(r.assignTo) === String(v.id)));
         fixedRoutes.forEach(r => {
-          for (let i = 0; i < r.count; i++) {
-            gapTrips.push(createTripInstance(r, mult, useRandomSpread));
-          }
+          for (let i = 0; i < r.count; i++) gapTrips.push(createTripInstance(r, mult, useRandomSpread));
         });
 
         const fixedKmSum = gapTrips.reduce((s, t) => s + t.km, 0);
@@ -1411,7 +1340,6 @@
           gapTrips = [...gapTrips, ...bestExtra];
         }
 
-        // Domknięcie co do kilometra
         if (gapTrips.length > 0) {
           let currGapSum = gapTrips.reduce((s, t) => s + t.km, 0);
           let diff = neededGapKm - currGapSum, guard = 0;
@@ -1427,7 +1355,6 @@
           if (diff !== 0) gapTrips[gapTrips.length - 1].km += diff;
         }
 
-        // Rozłóż gapTrips na wolne dni
         gapTrips.sort(() => Math.random() - 0.5);
         let candidateDates = [];
         if (gapDates.length > 0) {
@@ -1442,6 +1369,7 @@
           candidateDates = vActiveDates;
         }
 
+        let currentCarTrips = [];
         const unassignedGap = [...gapTrips];
         for (let dIdx = 0; dIdx < candidateDates.length; dIdx++) {
           const dStr = candidateDates[dIdx];
@@ -1467,7 +1395,6 @@
           });
         }
 
-        // Dodaj wpisy z dziennika dla tego auta
         carManualEntries.forEach(m => {
           currentCarTrips.push({
             date: m.date,
@@ -1485,21 +1412,17 @@
           });
         });
 
-        // Posortuj wszystkie dni dla tego auta
         currentCarTrips.sort((a, b) => a.date.localeCompare(b.date));
         allCombinedTrips = [...allCombinedTrips, ...currentCarTrips];
       }
 
       allCombinedTrips.sort((a, b) => a.date !== b.date ? a.date.localeCompare(b.date) : a.vehicleId - b.vehicleId);
 
-      // Przypisanie kierowców
       let driverBag = [];
       const usedDriversOnDate = {};
       allCombinedTrips.forEach(row => {
         if (!usedDriversOnDate[row.date]) usedDriversOnDate[row.date] = new Set();
-        if (row.isManual && row.driverName) {
-          usedDriversOnDate[row.date].add(row.driverName);
-        }
+        if (row.isManual && row.driverName) usedDriversOnDate[row.date].add(row.driverName);
       });
 
       function pickDriverForDate(dateStr, presetName) {
@@ -1548,17 +1471,17 @@
       const allBtn = document.createElement("button");
       allBtn.type = "button";
       allBtn.onclick = () => setResultsFilter("ALL");
-      allBtn.className = `px-3 py-1.5 rounded-lg text-xs font-bold border transition ${state.resultsFilterVehicleId === "ALL" ? 'bg-blue-600 text-white border-blue-500' : 'bg-slate-900 text-slate-300 border-slate-700'}`;
-      allBtn.textContent = `Wszystkie auta (${state.generatedRows.length})`;
+      allBtn.className = `px-3 py-1.5 rounded-lg text-xs font-bold border transition ${state.resultsFilterVehicleId === "ALL" ? 'bg-blue-600 text-white' : 'bg-slate-900 text-slate-300'}`;
+      allBtn.textContent = `Wszystkie (${state.generatedRows.length})`;
       tabsContainer.appendChild(allBtn);
 
       selectedVehicles.forEach(v => {
-        const countForVeh = state.generatedRows.filter(r => r.vehicleId === v.id).length;
+        const count = state.generatedRows.filter(r => r.vehicleId === v.id).length;
         const btn = document.createElement("button");
         btn.type = "button";
         btn.onclick = () => setResultsFilter(v.id);
-        btn.className = `px-3 py-1.5 rounded-lg text-xs font-bold border transition ${String(state.resultsFilterVehicleId) === String(v.id) ? 'bg-blue-600 text-white border-blue-500' : 'bg-slate-900 text-slate-300 border-slate-700'}`;
-        btn.textContent = `${v.name} (${countForVeh})`;
+        btn.className = `px-3 py-1.5 rounded-lg text-xs font-bold border transition ${String(state.resultsFilterVehicleId) === String(v.id) ? 'bg-blue-600 text-white' : 'bg-slate-900 text-slate-300'}`;
+        btn.textContent = `${v.name} (${count})`;
         tabsContainer.appendChild(btn);
       });
 
@@ -1570,26 +1493,24 @@
       visibleRows.forEach((row, visIdx) => {
         sumVisibleKm += row.km;
         const driverOptions = state.drivers.map(d => `<option value="${d.name}" ${d.name === row.driverName ? 'selected' : ''}>${d.name}</option>`).join('');
-        const badgeTag = row.isManual ? `<span class="text-[10px] bg-blue-500/20 text-blue-300 border border-blue-500/30 px-1.5 py-0.5 rounded ml-1">Z dziennika</span>` : `<span class="text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-1.5 py-0.5 rounded ml-1">Z luki</span>`;
+        const badgeTag = row.isManual ? `<span class="text-[10px] bg-blue-500/20 text-blue-300 border border-blue-500/30 px-1.5 py-0.5 rounded ml-1">Dziennik</span>` : `<span class="text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-1.5 py-0.5 rounded ml-1">Luka</span>`;
 
         const tr = document.createElement("tr");
         tr.className = "hover:bg-slate-700/30";
         tr.innerHTML = `
           <td class="py-2 px-2.5 font-mono text-slate-400">${visIdx + 1}</td>
-          <td class="py-2 px-2.5 font-mono font-semibold whitespace-nowrap text-white">${row.date}</td>
-          <td class="py-2 px-2.5 whitespace-nowrap text-blue-300 font-medium">${row.vehicleLabel}</td>
+          <td class="py-2 px-2.5 font-mono font-semibold text-white">${row.date}</td>
+          <td class="py-2 px-2.5 text-blue-300">${row.vehicleLabel}</td>
           <td class="py-2 px-2.5"><select onchange="updateRowDriver(${row.globalId}, this.value)" class="py-1 px-2 text-xs bg-slate-900 border border-slate-700 rounded text-amber-300">${driverOptions}</select></td>
           <td class="py-2 px-2.5 font-medium">${row.route} ${badgeTag}</td>
           <td class="py-2 px-2.5 text-right font-mono text-slate-200">${row.odoStart} &rarr; ${row.odoEnd} km</td>
           <td class="py-2 px-2.5 text-right font-mono font-bold text-emerald-400">${row.km} km</td>
-          <td class="py-2 px-2 text-center"><button type="button" onclick="removeResultRow(${row.globalId})" class="text-slate-400 hover:text-rose-400 px-1.5 font-bold">✕</button></td>
+          <td class="py-2 px-2 text-center"><button type="button" onclick="removeResultRow(${row.globalId})" class="text-slate-400 hover:text-rose-400 font-bold px-1.5">✕</button></td>
         `;
         tbody.appendChild(tr);
       });
 
       document.getElementById("footTotalKm").textContent = `${sumVisibleKm} km`;
-      document.getElementById("footLabel").textContent = state.resultsFilterVehicleId === "ALL" ? "Suma przejechanych kilometrów (wszystkie auta):" : "Suma przejechanych kilometrów:";
-
       const summaryParts = selectedVehicles.map(v => {
         const vRows = state.generatedRows.filter(r => r.vehicleId === v.id);
         const vSum = vRows.reduce((s, r) => s + r.km, 0);
@@ -1620,10 +1541,6 @@
             <div style="text-align: right;"><div><strong>Okres:</strong> ${v.dateFrom} &mdash; ${v.dateTo}</div><div><strong>Stan licznika:</strong> ${v.startOdo} &rarr; ${finalOdo} km (<strong>${vSum} km</strong>)</div></div>
           </div>
           <table><thead><tr><th style="width: 40px;">Lp.</th><th style="width: 95px;">Data</th><th style="width: 160px;">Kierowca</th><th>Trasa</th><th style="width: 140px; text-align: right;">Liczniki</th><th style="width: 90px; text-align: right;">Dystans</th></tr></thead><tbody>${rowsHtml}</tbody><tfoot><tr><td colspan="5" style="text-align: right; font-weight: bold;">RAZEM:</td><td style="text-align: right; font-weight: bold;">${vSum} km</td></tr></tfoot></table>
-          <div style="margin-top: 30px; display: flex; justify-content: space-between; font-size: 9pt;">
-            <div style="width: 240px; text-align: center;"><div style="border-bottom: 1px dotted #000; height: 24px;"></div><div>Podpis kierowcy</div></div>
-            <div style="width: 240px; text-align: center;"><div style="border-bottom: 1px dotted #000; height: 24px;"></div><div>Zatwierdził</div></div>
-          </div>
         `;
         printContainer.appendChild(sheet);
       });
@@ -1658,7 +1575,7 @@
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
-      a.href = url; a.download = "baza_kilometrowka_v10.json";
+      a.href = url; a.download = "baza_kilometrowka_v11.json";
       document.body.appendChild(a); a.click(); document.body.removeChild(a);
     }
 
@@ -1680,8 +1597,8 @@
           renderDrivers();
           renderRoutes();
           renderCalendarGrid();
-          alert("Pomyślnie wgrano bazę!");
-        } catch (err) { alert("Błąd odczytu pliku."); }
+          alert("Pomyślnie wgrano kopię!");
+        } catch (err) { alert("Błąd odczytu pliku JSON."); }
       };
       reader.readAsText(file);
     }
